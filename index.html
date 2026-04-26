@@ -9,53 +9,24 @@ body {
     margin: 0;
     font-family: Arial;
     background: #fdf6f0;
-    color: #333;
     text-align: center;
-    overflow-x: hidden;
+    overflow: hidden;
 }
 
+/* --- INTRO --- */
 #intro {
     position: fixed;
     width: 100%;
     height: 100%;
-    background: linear-gradient(135deg, #fbc2eb, #a6c1ee);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    flex-direction: column;
+    background: black;
     z-index: 999;
-    overflow: hidden;
 }
 
-#intro h1 {
-    font-size: 50px;
-    color: white;
-    animation: fadeIn 2s ease-in-out;
-}
-
-/* падаючі букви */
-.letter {
-    position: absolute;
-    top: -50px;
-    font-size: 20px;
-    color: white;
-    animation: fall linear infinite;
-}
-
-@keyframes fall {
-    to {
-        transform: translateY(110vh);
-    }
-}
-
-@keyframes fadeIn {
-    from {opacity: 0;}
-    to {opacity: 1;}
-}
-
+/* --- MAIN SITE --- */
 #main {
     display: none;
     padding: 40px;
+    background: #fdf6f0;
 }
 
 .gallery img {
@@ -79,16 +50,19 @@ button {
 
 <body>
 
+<!-- INTRO -->
 <div id="intro">
-    <h1>Happy Birthday 🎂</h1>
+    <canvas id="c"></canvas>
 </div>
 
+<!-- MAIN -->
 <div id="main">
-    <h1>С Днём Рождения, друг! 🎉</h1>
+    <h1>С Днём Рождения, Егор! 🎉</h1>
     <p>Немного воспоминаний...</p>
 
     <div class="gallery">
-        <img src="photo_1.jpg">
+        <img src="photo1.jpg">
+        <img src="photo2.jpg">
     </div>
 
     <p>Спасибо за все эти годы дружбы ❤️</p>
@@ -99,22 +73,73 @@ button {
 </div>
 
 <script>
+const canvas = document.getElementById("c");
+const ctx = canvas.getContext("2d");
 
-const intro = document.getElementById("intro");
+let W, H;
+const text = "Happy Birthday Egor";
+const points = [];
+const TOTAL = 120;
 
-for (let i = 0; i < 50; i++) {
-    let span = document.createElement("span");
-    span.className = "letter";
-    span.innerText = "🎉";
-    span.style.left = Math.random() * 100 + "vw";
-    span.style.animationDuration = (2 + Math.random() * 3) + "s";
-    intro.appendChild(span);
+function resize() {
+    W = canvas.width = window.innerWidth;
+    H = canvas.height = window.innerHeight;
+    buildPoints();
+}
+window.addEventListener("resize", resize);
+
+function heart(t) {
+    const x = 16 * Math.pow(Math.sin(t), 3);
+    const y = 13 * Math.cos(t) - 5 * Math.cos(2*t)
+            - 2 * Math.cos(3*t) - Math.cos(4*t);
+    return { x: x * 15, y: -y * 15 };
 }
 
+function buildPoints() {
+    points.length = 0;
+    for (let i = 0; i < TOTAL; i++) {
+        const t = (i / TOTAL) * Math.PI * 2;
+        points.push({ t });
+    }
+}
+
+function draw() {
+    ctx.clearRect(0, 0, W, H);
+
+    points.forEach(p => {
+        const pos = heart(p.t);
+
+        ctx.save();
+        ctx.translate(W/2 + pos.x, H/2 + pos.y);
+
+        ctx.fillStyle = "pink";
+        ctx.font = "14px Arial";
+        ctx.shadowColor = "pink";
+        ctx.shadowBlur = 10;
+
+        ctx.fillText(text, 0, 0);
+
+        ctx.restore();
+    });
+
+    // центральний текст
+    ctx.fillStyle = "white";
+    ctx.font = "bold 40px Arial";
+    ctx.textAlign = "center";
+    ctx.fillText("Happy Birthday 🎂", W/2, H/2);
+
+    requestAnimationFrame(draw);
+}
+
+resize();
+draw();
+
+// через 6 секунд показуємо сайт
 setTimeout(() => {
-    intro.style.display = "none";
+    document.getElementById("intro").style.display = "none";
     document.getElementById("main").style.display = "block";
-}, 5000);
+    document.body.style.overflow = "auto";
+}, 6000);
 </script>
 
 </body>
