@@ -11,6 +11,11 @@ body {
     overflow: hidden;
     font-family: Arial;
 }
+canvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+}
 #main {
     display: none;
     padding: 40px;
@@ -36,6 +41,7 @@ button {
 
 <body>
 
+<canvas id="bg"></canvas>
 <canvas id="c"></canvas>
 
 <div id="main">
@@ -53,23 +59,73 @@ button {
 </div>
 
 <script>
+// ===== BACKGROUND (падаючі слова) =====
+const bgCanvas = document.getElementById("bg");
+const bgCtx = bgCanvas.getContext("2d");
+
+let W, H;
+let drops = [];
+
+const words = ["I love you", "Happy Birthday"];
+
+function resizeAll(){
+    W = window.innerWidth;
+    H = window.innerHeight;
+
+    bgCanvas.width = W;
+    bgCanvas.height = H;
+
+    canvas.width = W;
+    canvas.height = H;
+
+    initDrops();
+}
+window.addEventListener("resize", resizeAll);
+
+function initDrops(){
+    drops = [];
+    for(let i=0;i<80;i++){
+        drops.push({
+            x: Math.random()*W,
+            y: Math.random()*-H,
+            speed: 1 + Math.random()*2,
+            text: words[Math.floor(Math.random()*words.length)],
+            size: 10 + Math.random()*10
+        });
+    }
+}
+
+function drawBG(){
+    bgCtx.fillStyle = "rgba(0,0,0,0.2)";
+    bgCtx.fillRect(0,0,W,H);
+
+    drops.forEach(d=>{
+        bgCtx.fillStyle = "#ff6ec7";
+        bgCtx.font = d.size + "px Arial";
+
+        bgCtx.shadowColor = "#ff6ec7";
+        bgCtx.shadowBlur = 10;
+
+        bgCtx.fillText(d.text, d.x, d.y);
+
+        d.y += d.speed;
+
+        if(d.y > H){
+            d.y = -20;
+            d.x = Math.random()*W;
+        }
+    });
+}
+
+// ===== HEART =====
 const canvas = document.getElementById("c");
 const ctx = canvas.getContext("2d");
 
-let W, H;
 let time = 0;
 
 const TEXT = " HAPPY BIRTHDAY EGOR 💖 ";
 const chars = TEXT.split("");
 
-function resize(){
-    W = canvas.width = window.innerWidth;
-    H = canvas.height = window.innerHeight;
-}
-window.addEventListener("resize", resize);
-resize();
-
-// формула серця
 function heart(t){
     return {
         x: 16 * Math.pow(Math.sin(t),3),
@@ -77,15 +133,14 @@ function heart(t){
     };
 }
 
-function draw(){
+function drawHeart(){
     ctx.clearRect(0,0,W,H);
 
-    let scale = 12 + Math.sin(time*2)*2; // пульсація
-    let rot = time * 0.6; // обертання
+    let scale = 12 + Math.sin(time*2)*2;
+    let rot = time * 0.6;
 
     for(let i=0;i<chars.length;i++){
 
-        // РУХ ПО СЕРЦЮ
         let t = (i / chars.length) * Math.PI * 2 + time;
 
         let p = heart(t);
@@ -93,21 +148,18 @@ function draw(){
         let x = p.x * scale;
         let y = p.y * scale;
 
-        // 3D ефект (перспектива)
         let z = Math.cos(t + time) * 50;
         let perspective = 300 / (300 - z);
 
         x *= perspective;
         y *= perspective;
 
-        // обертання
         let rx = x * Math.cos(rot) - y * Math.sin(rot);
         let ry = x * Math.sin(rot) + y * Math.cos(rot);
 
         ctx.save();
         ctx.translate(W/2 + rx, H/2 + ry);
 
-        // НЕОН
         ctx.fillStyle = "#ff7ac6";
         ctx.font = "bold 18px Arial";
 
@@ -119,21 +171,28 @@ function draw(){
         ctx.restore();
     }
 
-    // центральний текст
     ctx.fillStyle = "white";
     ctx.font = "bold 42px Arial";
     ctx.textAlign = "center";
     ctx.shadowBlur = 0;
     ctx.fillText("Happy Birthday 🎂", W/2, H/2);
-
-    time += 0.03;
-    requestAnimationFrame(draw);
 }
 
-draw();
+// ===== LOOP =====
+function animate(){
+    drawBG();
+    drawHeart();
 
-// через 6 секунд
+    time += 0.03;
+    requestAnimationFrame(animate);
+}
+
+resizeAll();
+animate();
+
+// ===== ПЕРЕХІД =====
 setTimeout(()=>{
+    bgCanvas.style.display = "none";
     canvas.style.display = "none";
     document.getElementById("main").style.display = "block";
     document.body.style.overflow = "auto";
