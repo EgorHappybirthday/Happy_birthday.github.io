@@ -2,7 +2,7 @@
 <html lang="ru">
 <head>
 <meta charset="UTF-8">
-<title>Happy Birthday 🎉</title>
+<title>Happy Birthday</title>
 
 <style>
 body {
@@ -11,29 +11,25 @@ body {
     overflow: hidden;
     font-family: Arial;
 }
-
 #main {
     display: none;
     padding: 40px;
     background: #fdf6f0;
     text-align: center;
 }
-
 .gallery img {
     width: 250px;
     margin: 10px;
     border-radius: 15px;
 }
-
 button {
     margin-top: 30px;
     padding: 15px 25px;
     font-size: 18px;
-    border: none;
     border-radius: 10px;
+    border: none;
     background: #ff9aa2;
     color: white;
-    cursor: pointer;
 }
 </style>
 </head>
@@ -51,10 +47,8 @@ button {
         <img src="photo2.jpg">
     </div>
 
-    <p>Спасибо за все эти годы дружбы ❤️</p>
-
     <a href="https://gameinvitation.com/" target="_blank">
-        <button>🎮 Пограти в гру</button>
+        <button>🎮 Пограти</button>
     </a>
 </div>
 
@@ -63,74 +57,87 @@ const canvas = document.getElementById("c");
 const ctx = canvas.getContext("2d");
 
 let W, H;
-const text = "Happy Birthday Egor";
-const TOTAL = 150;
 let time = 0;
 
-function resize() {
+const TEXT = " HAPPY BIRTHDAY EGOR 💖 ";
+const chars = TEXT.split("");
+
+function resize(){
     W = canvas.width = window.innerWidth;
     H = canvas.height = window.innerHeight;
 }
 window.addEventListener("resize", resize);
 resize();
 
-// серце
-function heart(t) {
-    const x = 16 * Math.pow(Math.sin(t), 3);
-    const y = 13 * Math.cos(t) - 5 * Math.cos(2*t)
-            - 2 * Math.cos(3*t) - Math.cos(4*t);
-    return { x, y };
+// формула серця
+function heart(t){
+    return {
+        x: 16 * Math.pow(Math.sin(t),3),
+        y: -(13*Math.cos(t) - 5*Math.cos(2*t) - 2*Math.cos(3*t) - Math.cos(4*t))
+    };
 }
 
-function draw() {
-    ctx.clearRect(0, 0, W, H);
+function draw(){
+    ctx.clearRect(0,0,W,H);
 
-    let scale = 12 + Math.sin(time * 2) * 2; // пульсація
-    let rotation = time * 0.5; // обертання
+    let scale = 12 + Math.sin(time*2)*2; // пульсація
+    let rot = time * 0.6; // обертання
 
-    for (let i = 0; i < TOTAL; i++) {
-        let t = (i / TOTAL) * Math.PI * 2 + time;
+    for(let i=0;i<chars.length;i++){
 
-        let pos = heart(t);
+        // РУХ ПО СЕРЦЮ
+        let t = (i / chars.length) * Math.PI * 2 + time;
 
-        // псевдо 3D обертання
-        let x = pos.x * scale;
-        let y = pos.y * scale;
+        let p = heart(t);
 
-        let rotatedX = x * Math.cos(rotation) - y * Math.sin(rotation);
-        let rotatedY = x * Math.sin(rotation) + y * Math.cos(rotation);
+        let x = p.x * scale;
+        let y = p.y * scale;
+
+        // 3D ефект (перспектива)
+        let z = Math.cos(t + time) * 50;
+        let perspective = 300 / (300 - z);
+
+        x *= perspective;
+        y *= perspective;
+
+        // обертання
+        let rx = x * Math.cos(rot) - y * Math.sin(rot);
+        let ry = x * Math.sin(rot) + y * Math.cos(rot);
 
         ctx.save();
-        ctx.translate(W/2 + rotatedX, H/2 + rotatedY);
+        ctx.translate(W/2 + rx, H/2 + ry);
 
-        ctx.fillStyle = "pink";
-        ctx.font = "14px Arial";
-        ctx.shadowColor = "pink";
-        ctx.shadowBlur = 15;
+        // НЕОН
+        ctx.fillStyle = "#ff7ac6";
+        ctx.font = "bold 18px Arial";
 
-        ctx.fillText(text, 0, 0);
+        ctx.shadowColor = "#ff4db8";
+        ctx.shadowBlur = 20;
+
+        ctx.fillText(chars[i], 0, 0);
 
         ctx.restore();
     }
 
-    // центр
+    // центральний текст
     ctx.fillStyle = "white";
     ctx.font = "bold 42px Arial";
     ctx.textAlign = "center";
+    ctx.shadowBlur = 0;
     ctx.fillText("Happy Birthday 🎂", W/2, H/2);
 
-    time += 0.02;
+    time += 0.03;
     requestAnimationFrame(draw);
 }
 
 draw();
 
-// через 6 сек показуємо сайт
-setTimeout(() => {
+// через 6 секунд
+setTimeout(()=>{
     canvas.style.display = "none";
     document.getElementById("main").style.display = "block";
     document.body.style.overflow = "auto";
-}, 6000);
+},6000);
 </script>
 
 </body>
