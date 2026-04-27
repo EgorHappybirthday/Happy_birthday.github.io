@@ -14,6 +14,32 @@
         #start-btn:hover { transform: scale(1.05); background: #ff4db8; }
         #flash-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: black; z-index: 50; display: none; }
 
+        /* ТИТРИ (НОВИЙ БЛОК) */
+        #credits-overlay {
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100dvh;
+            background: black; z-index: 40; display: none; overflow: hidden;
+        }
+        .credits-text {
+            position: absolute; width: 100%; text-align: center; color: white;
+            font-size: 22px; line-height: 1.6; font-family: 'Segoe UI', Arial, sans-serif;
+            transform: translateY(100vh); opacity: 0;
+            padding: 0 20px; box-sizing: border-box;
+        }
+        .credits-text p { margin: 10px 0; color: #ddd; }
+        .credits-text b { color: #fff; font-size: 26px; }
+        .credits-text h2 { margin-top: 40px; color: #ff7ac6; font-size: 32px; letter-spacing: 2px; }
+        
+        /* Анімація титрів: триває 14 секунд */
+        .credits-text.run {
+            animation: scrollCredits 14s linear forwards;
+        }
+        @keyframes scrollCredits {
+            0% { transform: translateY(100vh); opacity: 0; }
+            10% { opacity: 1; }
+            85% { opacity: 1; }
+            100% { transform: translateY(-100vh); opacity: 0; } /* Ховаються вгорі */
+        }
+
         /* ІНТРО КАНВАС */
         canvas { position: absolute; top: 0; left: 0; z-index: 1; }
         #click-hint { position: absolute; bottom: 40px; width: 100%; text-align: center; color: #ffffff; font-size: 18px; z-index: 10; opacity: 0; transition: opacity 1s; pointer-events: none; animation: pulse 1.5s infinite; }
@@ -51,22 +77,11 @@
 
         /* ПОВНОЕКРАННИЙ ОВЕРЛЕЙ ДЛЯ ГРИ */
         #game-overlay {
-            /* Ховаємо гру, але дозволяємо їй завантажитись у фоні */
-            visibility: hidden;
-            opacity: 0;
-            pointer-events: none;
-            
+            visibility: hidden; opacity: 0; pointer-events: none;
             position: fixed; top: 0; left: 0; width: 100vw; height: 100dvh;
-            background: #000; z-index: 9999;
-            transition: opacity 0.3s ease;
+            background: #000; z-index: 9999; transition: opacity 0.3s ease;
         }
-        /* Клас, який робить гру видимою */
-        #game-overlay.active {
-            visibility: visible;
-            opacity: 1;
-            pointer-events: auto;
-        }
-
+        #game-overlay.active { visibility: visible; opacity: 1; pointer-events: auto; }
         #close-game-btn {
             position: absolute; top: 15px; right: 15px; z-index: 10000;
             padding: 10px 20px; font-size: 16px; border-radius: 10px; border: none;
@@ -75,19 +90,16 @@
         }
         .game-container {
             position: absolute; top: 60px; left: 0; right: 0; bottom: 0;
-            overflow-y: auto; 
-            -webkit-overflow-scrolling: touch;
+            overflow-y: auto; -webkit-overflow-scrolling: touch;
         }
-        /* Примусово розтягуємо гру */
-        .remix-app {
-            width: 100% !important;
-            height: 100% !important;
-            min-height: 85vh !important;
-        }
+        .remix-app { width: 100% !important; height: 100% !important; min-height: 85vh !important; }
 
         @media (max-width: 600px) {
             .bento-grid { grid-template-columns: 1fr 1fr; grid-auto-rows: 140px; }
             .span-2-cols { grid-column: span 2; }
+            .credits-text { font-size: 18px; }
+            .credits-text b { font-size: 22px; }
+            .credits-text h2 { font-size: 26px; }
         }
     </style>
 </head>
@@ -95,6 +107,28 @@
 
 <div id="start-screen"><button id="start-btn">Відкрити подарунок 🎁</button></div>
 <div id="flash-overlay"></div>
+
+<div id="credits-overlay">
+    <div class="credits-text">
+        <p>Ти...</p>
+        <br>
+        <p>Єгор</p>
+        <p>Єгорка</p>
+        <p>Продольний</p>
+        <p><i>Та понад 100 інших прізвиськ...</i></p>
+        <br><br>
+        <p>Майже <b>4 000</b> днів дружби.</p>
+        <p>Більше <b>10 000</b> крутих спогадів.</p>
+        <p>Понад <b>100 000</b> смішних моментів.</p>
+        <br><br>
+        <p>Були моменти, коли між нами було<br>більше <b>2 000</b> кілометрів відстані.</p>
+        <br>
+        <p>Але попри все — ми досі друзі.</p>
+        <p>Дякую тобі за все.</p>
+        <h2>З Днем Народження!</h2>
+    </div>
+</div>
+
 <div id="click-hint">Натисни на екран 🎁</div>
 
 <canvas id="bg"></canvas>
@@ -170,7 +204,7 @@
         }
     }
 
-    // ===== ВСТУП =====
+    // ===== ВСТУП (ТАЙМІНГИ) =====
     document.getElementById('start-btn').addEventListener('click', () => {
         document.getElementById('start-screen').style.display = 'none';
         const flashOverlay = document.getElementById('flash-overlay');
@@ -188,15 +222,23 @@
             flashOverlay.style.backgroundColor = isWhite ? 'white' : 'black';
         }, 40); 
 
+        // Через 4 секунди: зупиняємо мигання
         setTimeout(() => {
             clearInterval(flashInterval);
             flashOverlay.style.backgroundColor = 'black'; 
             
             fadeOutFlashbang();
 
+            // Через 2.5 секунди (разом 6.5с) після затухання писку:
             setTimeout(() => {
                 flashOverlay.style.display = 'none'; 
                 
+                // 1. ПОКАЗУЄМО ТИТРИ
+                const creditsOverlay = document.getElementById('credits-overlay');
+                creditsOverlay.style.display = 'block';
+                document.querySelector('.credits-text').classList.add('run');
+
+                // 2. ВМИКАЄМО ПІСНЮ ПІД ТИТРИ
                 let vol = 0;
                 let fadeIn = setInterval(() => {
                     if (vol < 0.6) { 
@@ -207,8 +249,15 @@
                     }
                 }, 100);
 
-                startTime = Date.now();
-                animId = requestAnimationFrame(animate);
+                // 3. ЧЕКАЄМО 16 СЕКУНД (14с на титри + 2с чорного екрану)
+                setTimeout(() => {
+                    creditsOverlay.style.display = 'none';
+                    
+                    // ЗАПУСКАЄМО СТІНУ
+                    startTime = Date.now();
+                    animId = requestAnimationFrame(animate);
+                }, 16000); 
+                
             }, 2500);
             
         }, 4000); 
@@ -335,19 +384,13 @@
 
     // ===== ЛОГІКА ДЛЯ ГРИ ТА ЇЇ МУЗИКИ =====
     document.getElementById('open-game-btn').addEventListener('click', () => {
-        // Робимо гру видимою
         document.getElementById('game-overlay').classList.add('active');
-        
-        // Вмикаємо музику
         gameMusic.currentTime = 0;
         gameMusic.play().catch(e => console.log("Game audio error:", e));
     });
 
     document.getElementById('close-game-btn').addEventListener('click', () => {
-        // Ховаємо гру
         document.getElementById('game-overlay').classList.remove('active');
-        
-        // Зупиняємо музику
         gameMusic.pause();
     });
 
