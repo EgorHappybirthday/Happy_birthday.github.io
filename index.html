@@ -21,15 +21,10 @@ canvas { position: absolute; top: 0; left: 0; z-index: 1; }
 .gallery img { width: 100%; max-width: 300px; border-radius: 15px; }
 .main-btn { margin-top: 40px; padding: 15px 30px; font-size: 20px; border-radius: 10px; border: none; background: #ff7ac6; color: white; cursor: pointer; font-weight: bold; transition: transform 0.2s; }
 .main-btn:hover { transform: scale(1.05); }
-
-/* YouTube плеєр ховаємо */
-#youtube-player-container { position: absolute; width: 1px; height: 1px; overflow: hidden; z-index: -1; opacity: 0; }
 </style>
 </head>
 
 <body>
-
-<div id="youtube-player-container"><div id="youtube-player"></div></div>
 
 <div id="start-screen"><button id="start-btn">Відкрити подарунок 🎁</button></div>
 <div id="flash-overlay"></div>
@@ -48,28 +43,11 @@ canvas { position: absolute; top: 0; left: 0; z-index: 1; }
 </div>
 
 <script>
-// ===== YOUTUBE IFRAME API =====
-let ytPlayer;
-let isPlayerReady = false;
+// ===== АУДІО НАЛАШТУВАННЯ (БЕЗ YOUTUBE) =====
+// Створюємо аудіо. Файл song.mp3 має лежати в тій самій папці!
+const bgMusic = new Audio('song.mp3');
+bgMusic.preload = 'auto';
 
-const tag = document.createElement('script');
-tag.src = "https://www.youtube.com/iframe_api";
-const firstScriptTag = document.getElementsByTagName('script')[0];
-firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
-
-function onYouTubeIframeAPIReady() {
-    ytPlayer = new YT.Player('youtube-player', {
-        height: '100',
-        width: '100',
-        videoId: 'hK-eE5D2L0g', // Lyric-відео (менше шансів на блокування)
-        playerVars: {
-            'autoplay': 0, 'controls': 0, 'disablekb': 1, 'playsinline': 1
-        },
-        events: { 'onReady': () => isPlayerReady = true }
-    });
-}
-
-// ===== WEB AUDIO API: ПИСК =====
 let audioCtx, oscillator, gainNode;
 
 function startFlashbangSound() {
@@ -84,21 +62,9 @@ function startFlashbangSound() {
     oscillator.start();
 }
 
-function fadeOutSounds() {
+function fadeOutFlashbang() {
     if (gainNode && audioCtx) {
-        gainNode.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 2);
-    }
-    if (isPlayerReady && ytPlayer && typeof ytPlayer.getVolume === 'function') {
-        let vol = ytPlayer.getVolume();
-        let fadeOut = setInterval(() => {
-            if (vol > 5) {
-                vol -= 5;
-                ytPlayer.setVolume(vol);
-            } else {
-                ytPlayer.pauseVideo();
-                clearInterval(fadeOut);
-            }
-        }, 100);
+        gainNode.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 2.5);
     }
 }
 
@@ -108,14 +74,12 @@ document.getElementById('start-btn').addEventListener('click', () => {
     const flashOverlay = document.getElementById('flash-overlay');
     flashOverlay.style.display = 'block';
 
-    // РІШЕННЯ ДЛЯ YOUTUBE: Запускаємо відразу при кліку, але без звуку!
-    if (isPlayerReady) {
-        ytPlayer.unMute();
-        ytPlayer.setVolume(0); // Гучність 0, щоб не заважати писку
-        ytPlayer.seekTo(45); // Перемотуємо на 45 секунду
-        ytPlayer.playVideo();
-    }
+    // 1. Запускаємо музику миттєво, але БЕЗ ЗВУКУ, і мотаємо на 45 сек
+    bgMusic.volume = 0;
+    bgMusic.currentTime = 45;
+    bgMusic.play().catch(e => console.log("Браузер заблокував звук:", e));
 
+    // 2. Вмикаємо писк гранати
     startFlashbangSound();
 
     let isWhite = false;
@@ -129,17 +93,22 @@ document.getElementById('start-btn').addEventListener('click', () => {
         clearInterval(flashInterval);
         flashOverlay.style.backgroundColor = 'black'; 
         
-        if (gainNode && audioCtx) {
-            gainNode.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 2.5);
-        }
+        fadeOutFlashbang();
 
-        // Через ще 2.5 секунди (разом 6.5с): починається анімація і вмикається гучність пісні
+        // Через ще 2.5 секунди (разом 6.5с): починається анімація і пісня плавно стає гучною
         setTimeout(() => {
             flashOverlay.style.display = 'none'; 
             
-            if (isPlayerReady) {
-                ytPlayer.setVolume(70); // Різко вмикаємо гучність
-            }
+            // Плавна поява музики
+            let vol = 0;
+            let fadeIn = setInterval(() => {
+                if (vol < 0.6) { // Максимальна гучність 60%
+                    vol += 0.05;
+                    bgMusic.volume = Math.min(vol, 0.6);
+                } else {
+                    clearInterval(fadeIn);
+                }
+            }, 100);
 
             startTime = Date.now();
             animId = requestAnimationFrame(animate);
@@ -156,8 +125,7 @@ let drops = [];
 const words = ["I love you", "Happy Birthday", "Egorka", "Die With A Smile"];
 
 function resizeAll(){
-    W = window.innerWidth;
-    H = window.innerHeight;
+    W = window.innerWidth; H = window.innerHeight;
     bgCanvas.width = W; bgCanvas.height = H;
     canvas.width = W; canvas.height = H;
 }
@@ -165,16 +133,12 @@ window.addEventListener("resize", resizeAll);
 
 function initWall() {
     drops = [];
-    const text = "Happy Birthday";
-    const fontSize = 24; 
-    const textWidth = 190;
-    const textHeight = fontSize * 2;
-    const cols = Math.ceil(W / textWidth) + 1; 
-    const rows = Math.ceil(H / textHeight) + 3;
+    const fontSize = 24; const textWidth = 190; const textHeight = fontSize * 2;
+    const cols = Math.ceil(W / textWidth) + 1; const rows = Math.ceil(H / textHeight) + 3;
     let startY = -(rows * textHeight) - 100;
     for(let i = 0; i < cols; i++) {
         for(let j = 0; j < rows; j++) {
-            drops.push({ x: i * textWidth, y: startY + (j * textHeight), speed: 30, text: text, size: fontSize });
+            drops.push({ x: i * textWidth, y: startY + (j * textHeight), speed: 30, text: "Happy Birthday", size: fontSize });
         }
     }
 }
@@ -189,41 +153,28 @@ function initDrops(count, minSpeed, maxSpeed){
 const canvas = document.getElementById("c");
 const ctx = canvas.getContext("2d");
 let time = 0;
-const TEXT = " HAPPY BIRTHDAY EGOR 💖 ";
-const chars = TEXT.split("");
+const chars = " HAPPY BIRTHDAY EGOR 💖 ".split("");
 
 function heart(t){
-    return {
-        x: 16 * Math.pow(Math.sin(t), 3),
-        y: -(13 * Math.cos(t) - 5 * Math.cos(2*t) - 2 * Math.cos(3*t) - Math.cos(4*t))
-    };
+    return { x: 16 * Math.pow(Math.sin(t), 3), y: -(13 * Math.cos(t) - 5 * Math.cos(2*t) - 2 * Math.cos(3*t) - Math.cos(4*t)) };
 }
 
 function drawHeart(){
     ctx.clearRect(0,0,W,H);
-    let scale = Math.min(W, H) / 45;
-    scale = scale + Math.sin(time*2)*1.5;
+    let scale = Math.min(W, H) / 45; scale = scale + Math.sin(time*2)*1.5;
     let rot = time * 0.25; 
     for(let i=0;i<chars.length;i++){
         let t = (i / chars.length) * Math.PI * 2 + time;
         let p = heart(t);
         let x = p.x * scale; let y = p.y * scale;
-        let z = Math.cos(t + time) * 50;
-        let perspective = 300 / (300 - z);
+        let z = Math.cos(t + time) * 50; let perspective = 300 / (300 - z);
         x *= perspective; y *= perspective;
-        let rx = x * Math.cos(rot) - y * Math.sin(rot);
-        let ry = x * Math.sin(rot) + y * Math.cos(rot);
-        ctx.save();
-        ctx.translate(W/2 + rx, H/2 + ry - 30);
-        ctx.fillStyle = "#ff7ac6";
-        ctx.font = "bold 18px Arial";
-        ctx.fillText(chars[i], 0, 0);
-        ctx.restore();
+        let rx = x * Math.cos(rot) - y * Math.sin(rot); let ry = x * Math.sin(rot) + y * Math.cos(rot);
+        ctx.save(); ctx.translate(W/2 + rx, H/2 + ry - 30);
+        ctx.fillStyle = "#ff7ac6"; ctx.font = "bold 18px Arial"; ctx.fillText(chars[i], 0, 0); ctx.restore();
     }
     ctx.fillStyle = "white";
-    let fontSize = Math.min(W / 10, 42); 
-    ctx.font = "bold " + fontSize + "px Arial";
-    ctx.textAlign = "center";
+    ctx.font = "bold " + Math.min(W / 10, 42) + "px Arial"; ctx.textAlign = "center";
     ctx.fillText("Happy Birthday 🎂", W/2, H/2 - 30);
 }
 
@@ -236,29 +187,23 @@ function animate(){
     else if (stage === 1 && elapsed > 2000) { drops = []; stage = 2; }
     else if (stage === 2 && elapsed > 2500) { initDrops(60, 3, 7); document.getElementById("click-hint").style.opacity = 1; stage = 3; }
 
-    bgCtx.fillStyle = "black";
-    bgCtx.fillRect(0,0,W,H);
+    bgCtx.fillStyle = "black"; bgCtx.fillRect(0,0,W,H);
 
     drops.forEach(d => {
         bgCtx.font = "bold " + d.size + "px Arial";
         for(let j = trailCount; j >= 0; j--) {
-            let alpha = 1 - (j / trailCount); 
-            if(alpha <= 0) continue;
+            let alpha = 1 - (j / trailCount); if(alpha <= 0) continue;
             bgCtx.fillStyle = `rgba(255, 110, 199, ${alpha})`;
-            let ghostY = d.y - (j * d.size * 1.5); 
-            bgCtx.fillText(d.text, d.x, ghostY);
+            bgCtx.fillText(d.text, d.x, d.y - (j * d.size * 1.5));
         }
         d.y += d.speed;
-        let topGhostY = d.y - (trailCount * d.size * 1.5);
-        if(topGhostY > H && stage === 3){
-            d.y = -50 - (Math.random() * 100);
-            d.x = Math.random() * W;
+        if(d.y - (trailCount * d.size * 1.5) > H && stage === 3){
+            d.y = -50 - (Math.random() * 100); d.x = Math.random() * W;
         }
     });
 
     if (stage === 3) drawHeart();
-    time += 0.03;
-    animId = requestAnimationFrame(animate);
+    time += 0.03; animId = requestAnimationFrame(animate);
 }
 
 // ===== ПЕРЕХІД =====
@@ -269,30 +214,26 @@ function endIntro(e) {
     introActive = false;
 
     cancelAnimationFrame(animId);
-    fadeOutSounds(); 
-
-    bgCanvas.style.display = "none";
-    canvas.style.display = "none";
-    document.getElementById("click-hint").style.display = "none";
-    document.getElementById("flash-overlay").style.display = "none";
     
-    const mainDiv = document.getElementById("main");
-    mainDiv.style.display = "block";
-    mainDiv.style.opacity = 0;
-    let op = 0;
+    // Плавне вимикання пісні
+    let fadeOut = setInterval(() => {
+        if (bgMusic.volume > 0.05) { bgMusic.volume -= 0.05; } 
+        else { bgMusic.pause(); clearInterval(fadeOut); }
+    }, 100);
+
+    bgCanvas.style.display = "none"; canvas.style.display = "none";
+    document.getElementById("click-hint").style.display = "none";
+    
+    const mainDiv = document.getElementById("main"); mainDiv.style.display = "block";
+    mainDiv.style.opacity = 0; let op = 0;
     let fadeInterval = setInterval(() => {
-        if(op >= 1) clearInterval(fadeInterval);
-        mainDiv.style.opacity = op;
-        op += 0.08;
+        if(op >= 1) clearInterval(fadeInterval); mainDiv.style.opacity = op; op += 0.08;
     }, 30);
 
-    document.body.style.overflow = "auto";
-    document.body.style.touchAction = "auto";
+    document.body.style.overflow = "auto"; document.body.style.touchAction = "auto";
 }
 
-window.addEventListener("click", endIntro);
-window.addEventListener("touchstart", endIntro);
-
+window.addEventListener("click", endIntro); window.addEventListener("touchstart", endIntro);
 </script>
 </body>
 </html>
