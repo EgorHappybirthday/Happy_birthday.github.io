@@ -84,11 +84,11 @@ window.addEventListener("resize", resizeAll);
 
 function initDrops(){
     drops = [];
-    for(let i=0;i<80;i++){
+    for(let i=0;i<110;i++){
         drops.push({
             x: Math.random()*W,
             y: Math.random()*-H,
-            speed: 1 + Math.random()*2,
+            speed: 0.5 + Math.random()*1.5,
             text: words[Math.floor(Math.random()*words.length)],
             size: 10 + Math.random()*10
         });
@@ -137,7 +137,7 @@ function drawHeart(){
     ctx.clearRect(0,0,W,H);
 
     let scale = 12 + Math.sin(time*2)*2;
-    let rot = time * 0.6;
+    let rot = time * 0.35;
 
     for(let i=0;i<chars.length;i++){
 
@@ -196,8 +196,9 @@ setTimeout(()=>{
     canvas.style.display = "none";
     document.getElementById("main").style.display = "block";
     document.body.style.overflow = "auto";
-},6000);
+},8000);
 </script>
 
 </body>
 </html>
+
