@@ -37,31 +37,39 @@
         .bento-item:hover { transform: translateY(-5px); border-color: #ff7ac6; }
         .bento-item img, .bento-item video { width: 100%; height: 100%; object-fit: cover; }
 
-        /* Розміри для Bento */
         .span-2-cols { grid-column: span 2; }
         .span-2-rows { grid-row: span 2; }
 
-        /* Стилі для секції з грою */
-        .game-section {
-            grid-column: 1 / -1; /* Займає всю ширину сітки */
-            background: #111;
-            padding: 30px 15px;
-            margin-top: 20px;
-            border-radius: 20px;
-            border: 1px solid rgba(255, 122, 198, 0.4);
-            box-shadow: 0 0 30px rgba(255, 122, 198, 0.15);
+        /* Кнопка запуску гри */
+        .game-card {
+            grid-column: 1 / -1; background: linear-gradient(45deg, #ff7ac6, #ff4db8);
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            text-decoration: none; color: white; border: none; height: 150px; cursor: pointer;
+            margin-top: 20px; border-radius: 20px; font-weight: bold; font-size: 22px; transition: transform 0.2s;
         }
-        .game-section h2 {
-            color: #ff7ac6;
-            margin-top: 0;
-            margin-bottom: 20px;
-            font-size: 28px;
+        .game-card:hover { transform: scale(1.02); }
+
+        /* ПОВНОЕКРАННИЙ ОВЕРЛЕЙ ДЛЯ ГРИ */
+        #game-overlay {
+            display: none;
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: #000; z-index: 200; overflow: hidden;
+        }
+        #close-game-btn {
+            position: absolute; top: 20px; right: 20px; z-index: 201;
+            padding: 10px 20px; font-size: 16px; border-radius: 10px; border: none;
+            background: rgba(255, 255, 255, 0.2); color: white; cursor: pointer; backdrop-filter: blur(5px);
+        }
+        #close-game-btn:hover { background: rgba(255, 255, 255, 0.4); }
+        .game-container {
+            width: 100%; height: 100%; display: flex; align-items: center; justify-content: center;
+            padding-top: 50px; /* Місце для кнопки закриття */
+            box-sizing: border-box;
         }
 
         @media (max-width: 600px) {
             .bento-grid { grid-template-columns: 1fr 1fr; grid-auto-rows: 140px; }
             .span-2-cols { grid-column: span 2; }
-            .game-section { padding: 20px 10px; }
         }
     </style>
 </head>
@@ -99,19 +107,30 @@
         <div class="bento-item"><img src="photo_11.jpg" alt="Фото 11"></div>
         <div class="bento-item"><img src="photo_12.jpg" alt="Фото 12"></div>
 
-        <div class="game-section">
-            <h2>🎮 Твій фінальний бос</h2>
-            <div class="remix-app" data-hash="461db4677a8592d5">
-                <script src="https://p.interacty.me/l.js" async></script>
-            </div>
+        <button id="open-game-btn" class="game-card">
+            🎮 ПЕРЕЙТИ ДО ГРИ
+            <div style="font-size: 14px; font-weight: normal; margin-top: 5px;">Твій фінальний бос чекає тут</div>
+        </button>
+    </div>
+</div>
+
+<div id="game-overlay">
+    <button id="close-game-btn">❌ Повернутися</button>
+    <div class="game-container">
+        <div class="remix-app" data-hash="461db4677a8592d5" style="width: 100%; height: 100%;">
+            <script src="https://p.interacty.me/l.js" async></script>
         </div>
     </div>
 </div>
 
 <script>
     // ===== АУДІО НАЛАШТУВАННЯ =====
-    const bgMusic = new Audio('song.mp3');
+    const bgMusic = new Audio('song.mp3'); // Пісня для інтро
     bgMusic.preload = 'auto';
+
+    const gameMusic = new Audio('musik_1.mp3'); // Музика для гри
+    gameMusic.loop = true; // Зациклюємо її
+    gameMusic.preload = 'auto';
 
     let audioCtx, oscillator, gainNode;
 
@@ -141,7 +160,7 @@
 
         bgMusic.volume = 0;
         bgMusic.currentTime = 35;
-        bgMusic.play().catch(e => console.log("Браузер заблокував звук:", e));
+        bgMusic.play().catch(e => console.log("Audio block:", e));
 
         startFlashbangSound();
 
@@ -295,6 +314,25 @@
     }
 
     window.addEventListener("click", endIntro); window.addEventListener("touchstart", endIntro);
+
+    // ===== ЛОГІКА ДЛЯ ГРИ ТА ЇЇ МУЗИКИ =====
+    document.getElementById('open-game-btn').addEventListener('click', () => {
+        // Показуємо оверлей з грою
+        document.getElementById('game-overlay').style.display = 'block';
+        
+        // Вмикаємо музику для гри (з самого початку)
+        gameMusic.currentTime = 0;
+        gameMusic.play().catch(e => console.log("Game audio error:", e));
+    });
+
+    document.getElementById('close-game-btn').addEventListener('click', () => {
+        // Ховаємо оверлей
+        document.getElementById('game-overlay').style.display = 'none';
+        
+        // Зупиняємо музику гри
+        gameMusic.pause();
+    });
+
 </script>
 </body>
 </html>
