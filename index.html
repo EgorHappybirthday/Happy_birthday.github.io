@@ -51,10 +51,22 @@
 
         /* ПОВНОЕКРАННИЙ ОВЕРЛЕЙ ДЛЯ ГРИ */
         #game-overlay {
-            display: none;
-            position: fixed; top: 0; left: 0; width: 100vw; height: 100dvh; /* dvh ідеально для телефонів */
-            background: #000; z-index: 9999; /* Максимально поверх усього */
+            /* Ховаємо гру, але дозволяємо їй завантажитись у фоні */
+            visibility: hidden;
+            opacity: 0;
+            pointer-events: none;
+            
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100dvh;
+            background: #000; z-index: 9999;
+            transition: opacity 0.3s ease;
         }
+        /* Клас, який робить гру видимою */
+        #game-overlay.active {
+            visibility: visible;
+            opacity: 1;
+            pointer-events: auto;
+        }
+
         #close-game-btn {
             position: absolute; top: 15px; right: 15px; z-index: 10000;
             padding: 10px 20px; font-size: 16px; border-radius: 10px; border: none;
@@ -63,12 +75,13 @@
         }
         .game-container {
             position: absolute; top: 60px; left: 0; right: 0; bottom: 0;
-            overflow-y: auto; /* Дозволяємо скрол, якщо гра довга */
+            overflow-y: auto; 
             -webkit-overflow-scrolling: touch;
         }
         /* Примусово розтягуємо гру */
         .remix-app {
             width: 100% !important;
+            height: 100% !important;
             min-height: 85vh !important;
         }
 
@@ -122,16 +135,19 @@
 <div id="game-overlay">
     <button id="close-game-btn">❌ Повернутися</button>
     <div class="game-container" id="game-container-inner">
+        <div class="remix-app" data-hash="461db4677a8592d5">
+            <script src="https://p.interacty.me/l.js" async></script>
         </div>
+    </div>
 </div>
 
 <script>
     // ===== АУДІО НАЛАШТУВАННЯ =====
-    const bgMusic = new Audio('song.mp3'); // Пісня для інтро
+    const bgMusic = new Audio('song.mp3'); 
     bgMusic.preload = 'auto';
 
-    const gameMusic = new Audio('musik_1.mp3'); // Музика для гри
-    gameMusic.loop = true; // Зациклюємо її
+    const gameMusic = new Audio('musik_1.mp3'); 
+    gameMusic.loop = true; 
     gameMusic.preload = 'auto';
 
     let audioCtx, oscillator, gainNode;
@@ -319,24 +335,19 @@
 
     // ===== ЛОГІКА ДЛЯ ГРИ ТА ЇЇ МУЗИКИ =====
     document.getElementById('open-game-btn').addEventListener('click', () => {
-        document.getElementById('game-overlay').style.display = 'block';
+        // Робимо гру видимою
+        document.getElementById('game-overlay').classList.add('active');
         
-        // Вставляємо код гри від Interacty тільки тоді, коли вікно вже відкрите!
-        const container = document.getElementById('game-container-inner');
-        if (container.innerHTML.trim() === '') {
-            container.innerHTML = `<div class="remix-app" data-hash="461db4677a8592d5"></div>`;
-            const script = document.createElement('script');
-            script.src = "https://p.interacty.me/l.js";
-            script.async = true;
-            container.appendChild(script);
-        }
-
+        // Вмикаємо музику
         gameMusic.currentTime = 0;
         gameMusic.play().catch(e => console.log("Game audio error:", e));
     });
 
     document.getElementById('close-game-btn').addEventListener('click', () => {
-        document.getElementById('game-overlay').style.display = 'none';
+        // Ховаємо гру
+        document.getElementById('game-overlay').classList.remove('active');
+        
+        // Зупиняємо музику
         gameMusic.pause();
     });
 
