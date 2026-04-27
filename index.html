@@ -1,239 +1,291 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="uk">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Happy Birthday</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Happy Birthday Egor!</title>
+    <style>
+        /* ЗАГАЛЬНІ СТИЛІ */
+        body { margin: 0; background: black; overflow: hidden; font-family: 'Segoe UI', Arial, sans-serif; color: white; touch-action: none; }
 
-<style>
-body { margin: 0; background: black; overflow: hidden; font-family: Arial, sans-serif; color: white; touch-action: none; }
-#start-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: black; z-index: 100; display: flex; align-items: center; justify-content: center; }
-#start-btn { padding: 20px 40px; font-size: 24px; border-radius: 15px; border: none; background: #ff7ac6; color: white; cursor: pointer; font-weight: bold; transition: transform 0.2s, background 0.2s; box-shadow: 0 0 20px rgba(255, 122, 198, 0.5); }
-#start-btn:hover { transform: scale(1.05); background: #ff4db8; }
-#flash-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: black; z-index: 50; display: none; }
-canvas { position: absolute; top: 0; left: 0; z-index: 1; }
-#click-hint { position: absolute; bottom: 40px; width: 100%; text-align: center; color: #ffffff; font-size: 18px; z-index: 10; opacity: 0; transition: opacity 1s; pointer-events: none; animation: pulse 1.5s infinite; }
-@keyframes pulse { 0% { transform: scale(1); opacity: 0.5; } 50% { transform: scale(1.05); opacity: 1; } 100% { transform: scale(1); opacity: 0.5; } }
-#main { display: none; padding: 40px 20px; background: black; text-align: center; min-height: 100vh; box-sizing: border-box; position: relative; z-index: 20; }
-#main h1 { color: #ff7ac6; }
-#main p { color: #dddddd; }
-.gallery { display: flex; flex-wrap: wrap; justify-content: center; gap: 15px; }
-.gallery img { width: 100%; max-width: 300px; border-radius: 15px; }
-.main-btn { margin-top: 40px; padding: 15px 30px; font-size: 20px; border-radius: 10px; border: none; background: #ff7ac6; color: white; cursor: pointer; font-weight: bold; transition: transform 0.2s; }
-.main-btn:hover { transform: scale(1.05); }
-</style>
+        /* ЕКРАНИ ТА ОВЕРЛЕЇ */
+        #start-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: black; z-index: 100; display: flex; align-items: center; justify-content: center; }
+        #start-btn { padding: 20px 40px; font-size: 24px; border-radius: 15px; border: none; background: #ff7ac6; color: white; cursor: pointer; font-weight: bold; box-shadow: 0 0 20px rgba(255, 122, 198, 0.5); transition: 0.2s; }
+        #start-btn:hover { transform: scale(1.05); background: #ff4db8; }
+        #flash-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: black; z-index: 50; display: none; }
+
+        /* ІНТРО КАНВАС */
+        canvas { position: absolute; top: 0; left: 0; z-index: 1; }
+        #click-hint { position: absolute; bottom: 40px; width: 100%; text-align: center; color: #ffffff; font-size: 18px; z-index: 10; opacity: 0; transition: opacity 1s; pointer-events: none; animation: pulse 1.5s infinite; }
+        @keyframes pulse { 0%, 100% { opacity: 0.4; } 50% { opacity: 1; } }
+
+        /* ОСНОВНИЙ САЙТ (BENTO GRID) */
+        #main {
+            display: none; padding: 60px 20px; background: #050505; text-align: center;
+            min-height: 100vh; box-sizing: border-box; position: relative; z-index: 20; overflow-y: auto;
+        }
+        #main h1 { color: #ff7ac6; font-size: 32px; margin-bottom: 10px; }
+        #main p { color: #aaa; margin-bottom: 40px; }
+
+        .bento-grid {
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); grid-auto-rows: 200px;
+            gap: 15px; max-width: 1100px; margin: 0 auto;
+        }
+        .bento-item {
+            background: #111; border-radius: 20px; overflow: hidden; border: 1px solid rgba(255, 255, 255, 0.05); transition: transform 0.3s;
+        }
+        .bento-item:hover { transform: translateY(-5px); border-color: #ff7ac6; }
+        .bento-item img, .bento-item video { width: 100%; height: 100%; object-fit: cover; }
+
+        /* Розміри для Bento */
+        .span-2-cols { grid-column: span 2; }
+        .span-2-rows { grid-row: span 2; }
+
+        .game-card {
+            grid-column: 1 / -1; background: linear-gradient(45deg, #ff7ac6, #ff4db8);
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            text-decoration: none; color: white; border: none; height: 150px;
+            margin-top: 20px; border-radius: 20px; font-weight: bold; font-size: 22px;
+        }
+
+        @media (max-width: 600px) {
+            .bento-grid { grid-template-columns: 1fr 1fr; grid-auto-rows: 140px; }
+            .span-2-cols { grid-column: span 2; }
+        }
+    </style>
 </head>
-
 <body>
 
 <div id="start-screen"><button id="start-btn">Відкрити подарунок 🎁</button></div>
 <div id="flash-overlay"></div>
 <div id="click-hint">Натисни на екран 🎁</div>
+
 <canvas id="bg"></canvas>
 <canvas id="c"></canvas>
 
 <div id="main">
-    <h1>С Днём Рождения, Егор! 🎉</h1>
-    <p>Немного воспоминаний...</p>
-    <div class="gallery">
-        <img src="photo1.jpg" alt="Фото 1">
-        <img src="photo2.jpg" alt="Фото 2">
+    <h1>З Днем Народження, Єгоре! 🎉</h1>
+    <p>Наші найкращі моменти в одному місці</p>
+
+    <div class="bento-grid">
+        <div class="bento-item"><img src="photo_1.jpg"></div>
+        <div class="bento-item span-2-rows"><img src="photo_2.jpg"></div>
+        <div class="bento-item span-2-cols"><video src="video_1.mp4" muted autoplay loop playsinline></video></div>
+        
+        <div class="bento-item"><img src="photo_3.jpg"></div>
+        <div class="bento-item"><img src="photo_4.jpg"></div>
+        <div class="bento-item span-2-cols"><img src="photo_5.jpg"></div>
+        
+        <div class="bento-item"><video src="video_2.mp4" muted autoplay loop playsinline></video></div>
+        <div class="bento-item"><img src="photo_6.jpg"></div>
+        <div class="bento-item span-2-rows"><img src="photo_7.jpg"></div>
+        
+        <div class="bento-item"><img src="photo_8.jpg"></div>
+        <div class="bento-item span-2-cols"><video src="video_3.mp4" muted autoplay loop playsinline></video></div>
+        
+        <div class="bento-item"><img src="photo_9.jpg"></div>
+        <div class="bento-item"><img src="photo_10.jpg"></div>
+        <div class="bento-item"><img src="photo_11.jpg"></div>
+        <div class="bento-item"><img src="photo_12.jpg"></div>
     </div>
-    <a href="https://gameinvitation.com/" target="_blank"><button class="main-btn">🎮 Пограти</button></a>
+
+    <a href="https://gameinvitation.com/" target="_blank" class="game-card">
+        🎮 ПЕРЕЙТИ ДО ГРИ
+        <div style="font-size: 14px; font-weight: normal; margin-top: 5px;">Твій фінальний бос чекає тут</div>
+    </a>
 </div>
 
 <script>
-// ===== АУДІО НАЛАШТУВАННЯ (БЕЗ YOUTUBE) =====
-// Створюємо аудіо. Файл song.mp3 має лежати в тій самій папці!
-const bgMusic = new Audio('song.mp3');
-bgMusic.preload = 'auto';
+    // ===== АУДІО НАЛАШТУВАННЯ =====
+    const bgMusic = new Audio('song.mp3');
+    bgMusic.preload = 'auto';
 
-let audioCtx, oscillator, gainNode;
+    let audioCtx, oscillator, gainNode;
 
-function startFlashbangSound() {
-    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-    oscillator = audioCtx.createOscillator();
-    oscillator.type = 'sine';
-    oscillator.frequency.value = 7500; 
-    gainNode = audioCtx.createGain();
-    gainNode.gain.setValueAtTime(0.15, audioCtx.currentTime); 
-    oscillator.connect(gainNode);
-    gainNode.connect(audioCtx.destination);
-    oscillator.start();
-}
-
-function fadeOutFlashbang() {
-    if (gainNode && audioCtx) {
-        gainNode.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 2.5);
+    function startFlashbangSound() {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        oscillator = audioCtx.createOscillator();
+        oscillator.type = 'sine';
+        oscillator.frequency.value = 7500; 
+        gainNode = audioCtx.createGain();
+        gainNode.gain.setValueAtTime(0.15, audioCtx.currentTime); 
+        oscillator.connect(gainNode);
+        gainNode.connect(audioCtx.destination);
+        oscillator.start();
     }
-}
 
-// ===== ВСТУП =====
-document.getElementById('start-btn').addEventListener('click', () => {
-    document.getElementById('start-screen').style.display = 'none';
-    const flashOverlay = document.getElementById('flash-overlay');
-    flashOverlay.style.display = 'block';
+    function fadeOutFlashbang() {
+        if (gainNode && audioCtx) {
+            gainNode.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 2.5);
+        }
+    }
 
-    // 1. Запускаємо музику миттєво, але БЕЗ ЗВУКУ, і мотаємо на 45 сек
-    bgMusic.volume = 0;
-    bgMusic.currentTime = 35;
-    bgMusic.play().catch(e => console.log("Браузер заблокував звук:", e));
+    // ===== ВСТУП =====
+    document.getElementById('start-btn').addEventListener('click', () => {
+        document.getElementById('start-screen').style.display = 'none';
+        const flashOverlay = document.getElementById('flash-overlay');
+        flashOverlay.style.display = 'block';
 
-    // 2. Вмикаємо писк гранати
-    startFlashbangSound();
+        // Твої налаштування: 35 секунда
+        bgMusic.volume = 0;
+        bgMusic.currentTime = 35;
+        bgMusic.play().catch(e => console.log("Браузер заблокував звук:", e));
 
-    let isWhite = false;
-    const flashInterval = setInterval(() => {
-        isWhite = !isWhite;
-        flashOverlay.style.backgroundColor = isWhite ? 'white' : 'black';
-    }, 40); 
+        startFlashbangSound();
 
-    // Через 4 секунди: зупинка мигання і затухання писку
-    setTimeout(() => {
-        clearInterval(flashInterval);
-        flashOverlay.style.backgroundColor = 'black'; 
-        
-        fadeOutFlashbang();
+        let isWhite = false;
+        const flashInterval = setInterval(() => {
+            isWhite = !isWhite;
+            flashOverlay.style.backgroundColor = isWhite ? 'white' : 'black';
+        }, 40); 
 
-        // Через ще 2.5 секунди (разом 6.5с): починається анімація і пісня плавно стає гучною
         setTimeout(() => {
-            flashOverlay.style.display = 'none'; 
+            clearInterval(flashInterval);
+            flashOverlay.style.backgroundColor = 'black'; 
             
-            // Плавна поява музики
-            let vol = 0;
-            let fadeIn = setInterval(() => {
-                if (vol < 0.6) { // Максимальна гучність 60%
-                    vol += 0.05;
-                    bgMusic.volume = Math.min(vol, 0.6);
-                } else {
-                    clearInterval(fadeIn);
-                }
-            }, 100);
+            fadeOutFlashbang();
 
-            startTime = Date.now();
-            animId = requestAnimationFrame(animate);
-        }, 2500);
-        
-    }, 4000); 
-});
+            setTimeout(() => {
+                flashOverlay.style.display = 'none'; 
+                
+                let vol = 0;
+                let fadeIn = setInterval(() => {
+                    if (vol < 0.6) { 
+                        vol += 0.05;
+                        bgMusic.volume = Math.min(vol, 0.6);
+                    } else {
+                        clearInterval(fadeIn);
+                    }
+                }, 100);
 
-// ===== КАНВАС АНІМАЦІЯ =====
-const bgCanvas = document.getElementById("bg");
-const bgCtx = bgCanvas.getContext("2d");
-let W, H;
-let drops = [];
-const words = ["I love you", "Happy Birthday", "Egorka", "Die With A Smile"];
-
-function resizeAll(){
-    W = window.innerWidth; H = window.innerHeight;
-    bgCanvas.width = W; bgCanvas.height = H;
-    canvas.width = W; canvas.height = H;
-}
-window.addEventListener("resize", resizeAll);
-
-function initWall() {
-    drops = [];
-    const fontSize = 24; const textWidth = 190; const textHeight = fontSize * 2;
-    const cols = Math.ceil(W / textWidth) + 1; const rows = Math.ceil(H / textHeight) + 3;
-    let startY = -(rows * textHeight) - 100;
-    for(let i = 0; i < cols; i++) {
-        for(let j = 0; j < rows; j++) {
-            drops.push({ x: i * textWidth, y: startY + (j * textHeight), speed: 17, text: "Happy Birthday", size: fontSize });
-        }
-    }
-}
-
-function initDrops(count, minSpeed, maxSpeed){
-    drops = [];
-    for(let i = 0; i < count; i++){
-        drops.push({ x: Math.random() * W, y: Math.random() * -H * 1.5, speed: minSpeed + Math.random() * maxSpeed, text: words[Math.floor(Math.random() * words.length)], size: 14 + Math.random() * 12 });
-    }
-}
-
-const canvas = document.getElementById("c");
-const ctx = canvas.getContext("2d");
-let time = 0;
-const chars = " HAPPY BIRTHDAY EGOR ".split("");
-
-function heart(t){
-    return { x: 16 * Math.pow(Math.sin(t), 3), y: -(13 * Math.cos(t) - 5 * Math.cos(2*t) - 2 * Math.cos(3*t) - Math.cos(4*t)) };
-}
-
-function drawHeart(){
-    ctx.clearRect(0,0,W,H);
-    let scale = Math.min(W, H) / 45; scale = scale + Math.sin(time*2)*1.5;
-    let rot = time * 0.25; 
-    for(let i=0;i<chars.length;i++){
-        let t = (i / chars.length) * Math.PI * 2 + time;
-        let p = heart(t);
-        let x = p.x * scale; let y = p.y * scale;
-        let z = Math.cos(t + time) * 50; let perspective = 300 / (300 - z);
-        x *= perspective; y *= perspective;
-        let rx = x * Math.cos(rot) - y * Math.sin(rot); let ry = x * Math.sin(rot) + y * Math.cos(rot);
-        ctx.save(); ctx.translate(W/2 + rx, H/2 + ry - 30);
-        ctx.fillStyle = "#ff7ac6"; ctx.font = "bold 18px Arial"; ctx.fillText(chars[i], 0, 0); ctx.restore();
-    }
-    ctx.fillStyle = "white";
-    ctx.font = "bold " + Math.min(W / 10, 42) + "px Arial"; ctx.textAlign = "center";
-    ctx.fillText("Happy Birthday 🎂", W/2, H/2 - 30);
-}
-
-let stage = 0; let startTime; const trailCount = 5; let animId;
-resizeAll();
-
-function animate(){
-    let elapsed = Date.now() - startTime;
-    if(stage === 0) { initWall(); stage = 1; }
-    else if (stage === 1 && elapsed > 2000) { drops = []; stage = 2; }
-    else if (stage === 2 && elapsed > 2500) { initDrops(60, 3, 7); document.getElementById("click-hint").style.opacity = 1; stage = 3; }
-
-    bgCtx.fillStyle = "black"; bgCtx.fillRect(0,0,W,H);
-
-    drops.forEach(d => {
-        bgCtx.font = "bold " + d.size + "px Arial";
-        for(let j = trailCount; j >= 0; j--) {
-            let alpha = 1 - (j / trailCount); if(alpha <= 0) continue;
-            bgCtx.fillStyle = `rgba(255, 110, 199, ${alpha})`;
-            bgCtx.fillText(d.text, d.x, d.y - (j * d.size * 1.5));
-        }
-        d.y += d.speed;
-        if(d.y - (trailCount * d.size * 1.5) > H && stage === 3){
-            d.y = -50 - (Math.random() * 100); d.x = Math.random() * W;
-        }
+                startTime = Date.now();
+                animId = requestAnimationFrame(animate);
+            }, 2500);
+            
+        }, 4000); 
     });
 
-    if (stage === 3) drawHeart();
-    time += 0.03; animId = requestAnimationFrame(animate);
-}
-
-// ===== ПЕРЕХІД =====
-let introActive = true;
-function endIntro(e) {
-    if(e.target.id === 'start-btn') return;
-    if (!introActive || stage < 2) return; 
-    introActive = false;
-
-    cancelAnimationFrame(animId);
+    // ===== КАНВАС АНІМАЦІЯ =====
+    const bgCanvas = document.getElementById("bg");
+    const bgCtx = bgCanvas.getContext("2d");
+    let W, H;
+    let drops = [];
     
-    // Плавне вимикання пісні
-    let fadeOut = setInterval(() => {
-        if (bgMusic.volume > 0.05) { bgMusic.volume -= 0.05; } 
-        else { bgMusic.pause(); clearInterval(fadeOut); }
-    }, 100);
+    // Твої слова
+    const words = ["I love you", "Happy Birthday", "Egorka", "Die With A Smile"];
 
-    bgCanvas.style.display = "none"; canvas.style.display = "none";
-    document.getElementById("click-hint").style.display = "none";
+    function resizeAll(){
+        W = window.innerWidth; H = window.innerHeight;
+        bgCanvas.width = W; bgCanvas.height = H;
+        canvas.width = W; canvas.height = H;
+    }
+    window.addEventListener("resize", resizeAll);
+
+    function initWall() {
+        drops = [];
+        const fontSize = 24; const textWidth = 190; const textHeight = fontSize * 2;
+        const cols = Math.ceil(W / textWidth) + 1; const rows = Math.ceil(H / textHeight) + 3;
+        let startY = -(rows * textHeight) - 100;
+        for(let i = 0; i < cols; i++) {
+            for(let j = 0; j < rows; j++) {
+                // Твоя швидкість: 17
+                drops.push({ x: i * textWidth, y: startY + (j * textHeight), speed: 17, text: "Happy Birthday", size: fontSize });
+            }
+        }
+    }
+
+    function initDrops(count, minSpeed, maxSpeed){
+        drops = [];
+        for(let i = 0; i < count; i++){
+            drops.push({ x: Math.random() * W, y: Math.random() * -H * 1.5, speed: minSpeed + Math.random() * maxSpeed, text: words[Math.floor(Math.random() * words.length)], size: 14 + Math.random() * 12 });
+        }
+    }
+
+    const canvas = document.getElementById("c");
+    const ctx = canvas.getContext("2d");
+    let time = 0;
     
-    const mainDiv = document.getElementById("main"); mainDiv.style.display = "block";
-    mainDiv.style.opacity = 0; let op = 0;
-    let fadeInterval = setInterval(() => {
-        if(op >= 1) clearInterval(fadeInterval); mainDiv.style.opacity = op; op += 0.08;
-    }, 30);
+    // Твій напис навколо серця
+    const chars = " HAPPY BIRTHDAY EGOR ".split("");
 
-    document.body.style.overflow = "auto"; document.body.style.touchAction = "auto";
-}
+    function heart(t){
+        return { x: 16 * Math.pow(Math.sin(t), 3), y: -(13 * Math.cos(t) - 5 * Math.cos(2*t) - 2 * Math.cos(3*t) - Math.cos(4*t)) };
+    }
 
-window.addEventListener("click", endIntro); window.addEventListener("touchstart", endIntro);
+    function drawHeart(){
+        ctx.clearRect(0,0,W,H);
+        let scale = Math.min(W, H) / 45; scale = scale + Math.sin(time*2)*1.5;
+        let rot = time * 0.25; 
+        for(let i=0;i<chars.length;i++){
+            let t = (i / chars.length) * Math.PI * 2 + time;
+            let p = heart(t);
+            let x = p.x * scale; let y = p.y * scale;
+            let z = Math.cos(t + time) * 50; let perspective = 300 / (300 - z);
+            x *= perspective; y *= perspective;
+            let rx = x * Math.cos(rot) - y * Math.sin(rot); let ry = x * Math.sin(rot) + y * Math.cos(rot);
+            ctx.save(); ctx.translate(W/2 + rx, H/2 + ry - 30);
+            ctx.fillStyle = "#ff7ac6"; ctx.font = "bold 18px Arial"; ctx.fillText(chars[i], 0, 0); ctx.restore();
+        }
+        ctx.fillStyle = "white";
+        ctx.font = "bold " + Math.min(W / 10, 42) + "px Arial"; ctx.textAlign = "center";
+        ctx.fillText("Happy Birthday 🎂", W/2, H/2 - 30);
+    }
+
+    let stage = 0; let startTime; const trailCount = 5; let animId;
+    resizeAll();
+
+    function animate(){
+        let elapsed = Date.now() - startTime;
+        if(stage === 0) { initWall(); stage = 1; }
+        else if (stage === 1 && elapsed > 2000) { drops = []; stage = 2; }
+        else if (stage === 2 && elapsed > 2500) { initDrops(60, 3, 7); document.getElementById("click-hint").style.opacity = 1; stage = 3; }
+
+        bgCtx.fillStyle = "black"; bgCtx.fillRect(0,0,W,H);
+
+        drops.forEach(d => {
+            bgCtx.font = "bold " + d.size + "px Arial";
+            for(let j = trailCount; j >= 0; j--) {
+                let alpha = 1 - (j / trailCount); if(alpha <= 0) continue;
+                bgCtx.fillStyle = `rgba(255, 110, 199, ${alpha})`;
+                bgCtx.fillText(d.text, d.x, d.y - (j * d.size * 1.5));
+            }
+            d.y += d.speed;
+            if(d.y - (trailCount * d.size * 1.5) > H && stage === 3){
+                d.y = -50 - (Math.random() * 100); d.x = Math.random() * W;
+            }
+        });
+
+        if (stage === 3) drawHeart();
+        time += 0.03; animId = requestAnimationFrame(animate);
+    }
+
+    // ===== ПЕРЕХІД ДО САЙТУ =====
+    let introActive = true;
+    function endIntro(e) {
+        if(e.target.id === 'start-btn') return;
+        if (!introActive || stage < 2) return; 
+        introActive = false;
+
+        cancelAnimationFrame(animId);
+        
+        let fadeOut = setInterval(() => {
+            if (bgMusic.volume > 0.05) { bgMusic.volume -= 0.05; } 
+            else { bgMusic.pause(); clearInterval(fadeOut); }
+        }, 100);
+
+        bgCanvas.style.display = "none"; canvas.style.display = "none";
+        document.getElementById("click-hint").style.display = "none";
+        
+        const mainDiv = document.getElementById("main"); mainDiv.style.display = "block";
+        mainDiv.style.opacity = 0; let op = 0;
+        let fadeInterval = setInterval(() => {
+            if(op >= 1) clearInterval(fadeInterval); mainDiv.style.opacity = op; op += 0.08;
+        }, 30);
+
+        document.body.style.overflow = "auto"; document.body.style.touchAction = "auto";
+    }
+
+    window.addEventListener("click", endIntro); window.addEventListener("touchstart", endIntro);
 </script>
 </body>
 </html>
