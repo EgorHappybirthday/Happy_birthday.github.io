@@ -2,28 +2,53 @@
 <html lang="ru">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>Happy Birthday</title>
 
 <style>
 body {
     margin: 0;
     background: black;
-    overflow: hidden;
-    font-family: Arial;
+    overflow: hidden; /* Забороняємо скрол під час інтро */
+    font-family: Arial, sans-serif;
     color: white;
+    touch-action: none; /* Запобігає випадковим зумам на телефоні */
 }
 canvas {
     position: absolute;
     top: 0;
     left: 0;
+    z-index: 1;
 }
+/* Щоб підказка про клік була поверх канвасів */
+#click-hint {
+    position: absolute;
+    bottom: 40px;
+    width: 100%;
+    text-align: center;
+    color: #ffffff;
+    font-size: 18px;
+    z-index: 10;
+    opacity: 0;
+    transition: opacity 1s;
+    pointer-events: none; /* Щоб клік проходив крізь напис на канвас */
+    animation: pulse 1.5s infinite;
+}
+@keyframes pulse {
+    0% { transform: scale(1); opacity: 0.5; }
+    50% { transform: scale(1.05); opacity: 1; }
+    100% { transform: scale(1); opacity: 0.5; }
+}
+
 #main {
     display: none;
-    padding: 40px;
+    padding: 40px 20px;
     background: black; 
     text-align: center;
     min-height: 100vh; 
     box-sizing: border-box;
+    position: relative;
+    z-index: 20;
 }
 #main h1 {
     color: #ff7ac6;
@@ -31,29 +56,39 @@ canvas {
 #main p {
     color: #dddddd;
 }
+.gallery {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 15px;
+}
 .gallery img {
-    width: 250px;
-    margin: 10px;
+    width: 100%;
+    max-width: 300px;
     border-radius: 15px;
 }
 button {
-    margin-top: 30px;
-    padding: 15px 25px;
-    font-size: 18px;
+    margin-top: 40px;
+    padding: 15px 30px;
+    font-size: 20px;
     border-radius: 10px;
     border: none;
     background: #ff7ac6;
     color: white;
     cursor: pointer;
-    transition: transform 0.2s;
+    font-weight: bold;
+    transition: transform 0.2s, background 0.2s;
 }
 button:hover {
     transform: scale(1.05);
+    background: #ff4db8;
 }
 </style>
 </head>
 
 <body>
+
+<div id="click-hint">Натисни на екран 🎁</div>
 
 <canvas id="bg"></canvas>
 <canvas id="c"></canvas>
@@ -80,7 +115,7 @@ const bgCtx = bgCanvas.getContext("2d");
 let W, H;
 let drops = [];
 
-const words = ["I love you", "Happy Birthday"];
+const words = ["I love you", "Happy Birthday", "Egorka", "Happy B-Day"];
 
 function resizeAll(){
     W = window.innerWidth;
@@ -94,35 +129,44 @@ function resizeAll(){
 }
 window.addEventListener("resize", resizeAll);
 
-// Функція для створення монолітної стіни (в один ряд)
+// Функція для створення СПРАВЖНЬОЇ стіни (сіткою)
 function initWall() {
     drops = [];
     const text = "Happy Birthday";
-    const fontSize = 32; // Великий шрифт для стіни
-    const textWidth = 260; // Орієнтовна ширина одного напису
-    const cols = Math.ceil(W / textWidth) + 1; // Рахуємо скільки слів влізе в ширину екрану
+    const fontSize = 24; 
+    const textWidth = 190; // Приблизна ширина слова
+    const textHeight = fontSize * 2; // Висота рядка
+    
+    // Рахуємо скільки треба колонок і рядків, щоб закрити весь екран
+    const cols = Math.ceil(W / textWidth) + 1; 
+    const rows = Math.ceil(H / textHeight) + 3; // +3 для запасу
+
+    // Генеруємо блок, який спочатку знаходиться повністю ВИЩЕ екрану
+    let startY = -(rows * textHeight) - 100;
 
     for(let i = 0; i < cols; i++) {
-        drops.push({
-            x: i * textWidth,
-            y: -100, // Всі починають з однакової висоти над екраном
-            speed: 15, // Дуже висока швидкість для "падіння стіни"
-            text: text,
-            size: fontSize
-        });
+        for(let j = 0; j < rows; j++) {
+            drops.push({
+                x: i * textWidth,
+                y: startY + (j * textHeight), 
+                speed: 30, // Стіна падає ДУЖЕ швидко
+                text: text,
+                size: fontSize
+            });
+        }
     }
 }
 
-// Функція для випадкових повільних слів
+// Функція для швидких крапель-написів
 function initDrops(count, minSpeed, maxSpeed){
     drops = [];
     for(let i = 0; i < count; i++){
         drops.push({
             x: Math.random() * W,
-            y: Math.random() * -H * 1.5, // Розкидані по висоті
-            speed: minSpeed + Math.random() * maxSpeed, // Різна швидкість
+            y: Math.random() * -H * 1.5,
+            speed: minSpeed + Math.random() * maxSpeed, // Швидкість тепер буде вищою
             text: words[Math.floor(Math.random() * words.length)],
-            size: 14 + Math.random() * 10
+            size: 14 + Math.random() * 12
         });
     }
 }
@@ -145,7 +189,9 @@ function heart(t){
 function drawHeart(){
     ctx.clearRect(0,0,W,H);
 
-    let scale = 12 + Math.sin(time*2)*2;
+    let scale = Math.min(W, H) / 45; // Адаптивний розмір серця під екрани телефонів
+    scale = scale + Math.sin(time*2)*1.5; // Пульсація
+    
     let rot = time * 0.25; 
 
     for(let i=0;i<chars.length;i++){
@@ -165,7 +211,7 @@ function drawHeart(){
         let ry = x * Math.sin(rot) + y * Math.cos(rot);
 
         ctx.save();
-        ctx.translate(W/2 + rx, H/2 + ry);
+        ctx.translate(W/2 + rx, H/2 + ry - 30); // Трохи підняв, щоб звільнити місце для тексту внизу
 
         ctx.fillStyle = "#ff7ac6";
         ctx.font = "bold 18px Arial";
@@ -175,33 +221,41 @@ function drawHeart(){
     }
 
     ctx.fillStyle = "white";
-    ctx.font = "bold 42px Arial";
+    // Розмір центрального тексту теж адаптуємо
+    let fontSize = Math.min(W / 10, 42); 
+    ctx.font = "bold " + fontSize + "px Arial";
     ctx.textAlign = "center";
     ctx.shadowBlur = 0;
-    ctx.fillText("Happy Birthday 🎂", W/2, H/2);
+    ctx.fillText("Happy Birthday 🎂", W/2, H/2 - 30);
 }
 
-// ===== ЛОГІКА АНІМАЦІЇ (ФАЗИ) =====
+// ===== ЛОГІКА АНІМАЦІЇ =====
 let stage = 0;
 let startTime = Date.now();
-const trailCount = 6; // Кількість копій для шлейфу
+const trailCount = 5; // Довжина шлейфу
+let animId; // Змінна для зупинки анімації
 
 resizeAll();
 
 function animate(){
     let elapsed = Date.now() - startTime;
 
-    // Таймінг подій:
+    // Таймінг подій
     if(stage === 0) {
-        initWall(); // Створюємо стіну
+        initWall(); // Стіна
         stage = 1;
-    } else if (stage === 1 && elapsed > 2500) {
-        // 2.5 секунди стіна пролітає і зникає, робимо паузу
-        drops = []; // Очищаємо масив, щоб екран був пустий
+    } else if (stage === 1 && elapsed > 2000) {
+        // Стіна пролетіла
+        drops = []; 
         stage = 2;
-    } else if (stage === 2 && elapsed > 3500) {
-        // На 3.5 секунді запускаємо серце і повільні слова
-        initDrops(50, 1, 2.5);
+    } else if (stage === 2 && elapsed > 2500) {
+        // Серце і дощ
+        // Швидкість збільшено (від 3 до 7), щоб на телефоні встигало падати
+        initDrops(60, 3, 7);
+        
+        // Показуємо підказку "Натисни на екран"
+        document.getElementById("click-hint").style.opacity = 1;
+        
         stage = 3;
     }
 
@@ -226,48 +280,62 @@ function animate(){
 
         let topGhostY = d.y - (trailCount * d.size * 1.5);
 
-        // Якщо слово і його шлейф повністю зникли внизу
         if(topGhostY > H){
-            if(stage >= 3) {
-                // Тільки на 3 стадії слова повертаються нагору (нескінченний дощ)
-                d.y = -50 - (Math.random() * 200);
+            if(stage === 3) {
+                d.y = -50 - (Math.random() * 100);
                 d.x = Math.random() * W;
             }
         }
     });
 
-    // Серце малюємо тільки коли падає "дощ" зі слів (стадія 3)
     if (stage === 3) {
         drawHeart();
     }
 
     time += 0.03;
-
-    if(elapsed < 12000) {
-        requestAnimationFrame(animate);
-    }
+    animId = requestAnimationFrame(animate);
 }
 
-animate();
+// Запускаємо анімацію
+animId = requestAnimationFrame(animate);
 
-// ===== ПЕРЕХІД НА САЙТ =====
-setTimeout(() => {
+// ===== ПЕРЕХІД НА САЙТ ЗА КЛІКОМ =====
+let introActive = true;
+
+function endIntro() {
+    if (!introActive || stage < 2) return; // Не даємо клікнути, поки стіна не впала
+    introActive = false;
+
+    // Зупиняємо анімацію
+    cancelAnimationFrame(animId);
+
+    // Ховаємо інтро
     bgCanvas.style.display = "none";
     canvas.style.display = "none";
+    document.getElementById("click-hint").style.display = "none";
     
+    // Показуємо основний сайт
     const mainDiv = document.getElementById("main");
     mainDiv.style.display = "block";
     
+    // Плавна поява
     mainDiv.style.opacity = 0;
     let op = 0;
     let fadeInterval = setInterval(() => {
         if(op >= 1) clearInterval(fadeInterval);
         mainDiv.style.opacity = op;
-        op += 0.05;
-    }, 50);
+        op += 0.08;
+    }, 30);
 
+    // Дозволяємо скролити сайт
     document.body.style.overflow = "auto";
-}, 12000);
+    document.body.style.touchAction = "auto";
+}
+
+// Слухаємо клік мишкою або тап по екрану телефону
+window.addEventListener("click", endIntro);
+window.addEventListener("touchstart", endIntro);
+
 </script>
 
 </body>
