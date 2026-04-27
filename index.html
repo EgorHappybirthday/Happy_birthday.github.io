@@ -21,6 +21,9 @@ canvas {
     padding: 40px;
     background: #fdf6f0;
     text-align: center;
+    /* Додав мінімальну висоту, щоб контент виглядав краще */
+    min-height: 100vh; 
+    box-sizing: border-box;
 }
 .gallery img {
     width: 250px;
@@ -35,6 +38,11 @@ button {
     border: none;
     background: #ff9aa2;
     color: white;
+    cursor: pointer;
+    transition: transform 0.2s;
+}
+button:hover {
+    transform: scale(1.05);
 }
 </style>
 </head>
@@ -49,8 +57,8 @@ button {
     <p>Немного воспоминаний...</p>
 
     <div class="gallery">
-        <img src="photo1.jpg">
-        <img src="photo2.jpg">
+        <img src="photo1.jpg" alt="Фото 1">
+        <img src="photo2.jpg" alt="Фото 2">
     </div>
 
     <a href="https://gameinvitation.com/" target="_blank">
@@ -77,45 +85,22 @@ function resizeAll(){
 
     canvas.width = W;
     canvas.height = H;
-
-    initDrops();
 }
 window.addEventListener("resize", resizeAll);
 
-function initDrops(){
+// Додав параметри: кількість, мінімальна та максимальна швидкість, і чи тільки "Happy Birthday"
+function initDrops(count, minSpeed, maxSpeed, onlyHB = false){
     drops = [];
-    for(let i=0;i<110;i++){
+    for(let i = 0; i < count; i++){
+        let textOpt = onlyHB ? "Happy Birthday" : words[Math.floor(Math.random() * words.length)];
         drops.push({
-            x: Math.random()*W,
-            y: Math.random()*-H,
-            speed: 0.5 + Math.random()*1.5,
-            text: words[Math.floor(Math.random()*words.length)],
-            size: 10 + Math.random()*10
+            x: Math.random() * W,
+            y: Math.random() * -H * 2, // розкидаємо вище екрану, щоб падали рівномірно
+            speed: minSpeed + Math.random() * maxSpeed,
+            text: textOpt,
+            size: 10 + Math.random() * 14
         });
     }
-}
-
-function drawBG(){
-    // ШЛЕЙФ
-    bgCtx.fillStyle = "rgba(0,0,0,0.15)";
-    bgCtx.fillRect(0,0,W,H);
-
-    drops.forEach(d=>{
-        bgCtx.fillStyle = "#ff6ec7";
-        bgCtx.font = d.size + "px Arial";
-
-        bgCtx.shadowColor = "#ff6ec7";
-        bgCtx.shadowBlur = 10;
-
-        bgCtx.fillText(d.text, d.x, d.y);
-
-        d.y += d.speed;
-
-        if(d.y > H){
-            d.y = -20;
-            d.x = Math.random()*W;
-        }
-    });
 }
 
 // ===== HEART =====
@@ -123,14 +108,13 @@ const canvas = document.getElementById("c");
 const ctx = canvas.getContext("2d");
 
 let time = 0;
-
 const TEXT = " HAPPY BIRTHDAY EGOR 💖 ";
 const chars = TEXT.split("");
 
 function heart(t){
     return {
-        x: 16 * Math.pow(Math.sin(t),3),
-        y: -(13*Math.cos(t) - 5*Math.cos(2*t) - 2*Math.cos(3*t) - Math.cos(4*t))
+        x: 16 * Math.pow(Math.sin(t), 3),
+        y: -(13 * Math.cos(t) - 5 * Math.cos(2*t) - 2 * Math.cos(3*t) - Math.cos(4*t))
     };
 }
 
@@ -138,12 +122,10 @@ function drawHeart(){
     ctx.clearRect(0,0,W,H);
 
     let scale = 12 + Math.sin(time*2)*2;
-    let rot = time * 0.25; // повільніше
+    let rot = time * 0.25; 
 
     for(let i=0;i<chars.length;i++){
-
         let t = (i / chars.length) * Math.PI * 2 + time;
-
         let p = heart(t);
 
         let x = p.x * scale;
@@ -163,16 +145,13 @@ function drawHeart(){
 
         ctx.fillStyle = "#ff7ac6";
         ctx.font = "bold 18px Arial";
-
         ctx.shadowColor = "#ff4db8";
         ctx.shadowBlur = 20;
-
         ctx.fillText(chars[i], 0, 0);
-
         ctx.restore();
     }
 
-    // центральний текст
+    // Центральний текст
     ctx.fillStyle = "white";
     ctx.font = "bold 42px Arial";
     ctx.textAlign = "center";
@@ -180,25 +159,97 @@ function drawHeart(){
     ctx.fillText("Happy Birthday 🎂", W/2, H/2);
 }
 
-// ===== LOOP =====
-function animate(){
-    drawBG();
-    drawHeart();
-
-    time += 0.03;
-    requestAnimationFrame(animate);
-}
+// ===== ЛОГІКА АНІМАЦІЇ (ФАЗИ) =====
+let stage = 0;
+let startTime = Date.now();
+let trailAlpha = 0.08; // Менше значення = довший шлейф (було 0.15)
 
 resizeAll();
+
+function animate(){
+    let elapsed = Date.now() - startTime;
+
+    // Управління фазами:
+    if(stage === 0) {
+        // Стадія 0: Початкова швидка стіна
+        initDrops(300, 8, 12, true); // 300 слів, велика швидкість, тільки "Happy Birthday"
+        stage = 1;
+    } else if (stage === 1 && elapsed > 3000) {
+        // Стадія 2: Починаємо ховати "стіну" (слова більше не з'являються зверху)
+        stage = 2;
+    } else if (stage === 2 && elapsed > 5000) {
+        // Стадія 3: Стіна зникла, очищаємо фон, запускаємо звичайні слова і серце
+        bgCtx.fillStyle = "black";
+        bgCtx.fillRect(0, 0, W, H);
+        initDrops(100, 0.5, 2, false); // Звичайна швидкість і різні слова
+        stage = 3;
+    }
+
+    // Малювання фону (залежить від стадії)
+    if (stage === 2) {
+        trailAlpha = 0.2; // Швидше замальовуємо екран чорним під час переходу
+    } else {
+        trailAlpha = 0.06; // Доооовгий шлейф для стіни та звичайного падіння
+    }
+
+    bgCtx.fillStyle = `rgba(0,0,0,${trailAlpha})`;
+    bgCtx.fillRect(0,0,W,H);
+
+    drops.forEach(d => {
+        bgCtx.fillStyle = "#ff6ec7";
+        bgCtx.font = "bold " + d.size + "px Arial";
+        bgCtx.shadowColor = "#ff6ec7";
+        bgCtx.shadowBlur = 10;
+        bgCtx.fillText(d.text, d.x, d.y);
+
+        d.y += d.speed;
+
+        // Поведінка слів, коли вони досягають низу екрану
+        if(d.y > H){
+            if(stage === 2) {
+                // На стадії 2 (згасання) слова падають і НЕ з'являються знову
+            } else {
+                d.y = -20;
+                d.x = Math.random() * W;
+            }
+        }
+    });
+
+    // Малювання серця тільки на 3-й стадії
+    if (stage === 3) {
+        drawHeart();
+    }
+
+    time += 0.03;
+
+    // Зупиняємо анімацію, коли час вийшов
+    if(elapsed < 12000) {
+        requestAnimationFrame(animate);
+    }
+}
+
 animate();
 
-// ===== ПЕРЕХІД =====
-setTimeout(()=>{
+// ===== ПЕРЕХІД НА САЙТ =====
+setTimeout(() => {
     bgCanvas.style.display = "none";
     canvas.style.display = "none";
-    document.getElementById("main").style.display = "block";
+    
+    const mainDiv = document.getElementById("main");
+    mainDiv.style.display = "block";
+    
+    // Плавна поява контенту
+    mainDiv.style.opacity = 0;
+    let op = 0;
+    let fadeInterval = setInterval(() => {
+        if(op >= 1) clearInterval(fadeInterval);
+        mainDiv.style.opacity = op;
+        op += 0.05;
+    }, 50);
+
     document.body.style.overflow = "auto";
-},8000);
+    document.body.style.background = "#fdf6f0"; // Змінюємо чорний фон тіла на світлий
+}, 12000); // Час збільшено до 12 секунд
 </script>
 
 </body>
