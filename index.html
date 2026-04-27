@@ -45,7 +45,7 @@ body {
     background: #ff4db8;
 }
 
-/* ЕКРАН ДЛЯ МИГАННЯ */
+/* ЕКРАН ДЛЯ МИГАННЯ ТА ЧОРНОЇ ПАУЗИ */
 #flash-overlay {
     position: fixed;
     top: 0;
@@ -53,7 +53,7 @@ body {
     width: 100%;
     height: 100%;
     background: black;
-    z-index: 50; /* Нижче за старт, але вище за канвас */
+    z-index: 50; 
     display: none;
 }
 
@@ -146,74 +146,79 @@ canvas {
 </div>
 
 <script>
-// ===== WEB AUDIO API: ГЕНЕРАТОР БІЛОГО ШУМУ =====
+// ===== WEB AUDIO API: СВІТЛОШУМОВИЙ ПИСК =====
 let audioCtx;
-let noiseSource;
+let oscillator;
 let gainNode;
 
-function startWhiteNoise() {
+function startFlashbangSound() {
     audioCtx = new (window.AudioContext || window.webkitAudioContext)();
     
-    // Створюємо буфер на 2 секунди
-    const bufferSize = audioCtx.sampleRate * 2; 
-    const noiseBuffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
-    const output = noiseBuffer.getChannelData(0);
-    
-    // Заповнюємо буфер випадковими значеннями (це і є білий шум)
-    for (let i = 0; i < bufferSize; i++) {
-        output[i] = Math.random() * 2 - 1;
-    }
+    // Створюємо осцилятор для чистого "писку"
+    oscillator = audioCtx.createOscillator();
+    oscillator.type = 'sine'; // чиста хвиля
+    oscillator.frequency.value = 7500; // Висока частота (писк у вухах)
 
-    noiseSource = audioCtx.createBufferSource();
-    noiseSource.buffer = noiseBuffer;
-    noiseSource.loop = true; // Зациклюємо
-
-    // Контролер гучності
     gainNode = audioCtx.createGain();
-    gainNode.gain.value = 0.5; // Гучність 50%
+    // Гучність (0.15 щоб не розірвати динаміки, але достатньо гучно для ефекту)
+    gainNode.gain.setValueAtTime(0.15, audioCtx.currentTime); 
 
-    noiseSource.connect(gainNode);
+    oscillator.connect(gainNode);
     gainNode.connect(audioCtx.destination);
-    noiseSource.start();
+    
+    oscillator.start();
 }
 
-function stopWhiteNoise() {
-    if (gainNode) {
-        // Плавне затухання звуку за 1 секунду
-        gainNode.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 1);
-        setTimeout(() => { if (noiseSource) noiseSource.stop(); }, 1000);
+function fadeOutFlashbangSound() {
+    if (gainNode && audioCtx) {
+        // Плавне затухання звуку протягом 2.5 секунд
+        gainNode.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 2.5);
+        setTimeout(() => { if (oscillator) oscillator.stop(); }, 2500);
     }
 }
 
-// ===== ПОСЛІДОВНІСТЬ ВСТУПУ (МИГАННЯ) =====
+function stopAudioImmediately() {
+    if (gainNode && audioCtx) {
+        gainNode.gain.cancelScheduledValues(audioCtx.currentTime);
+        gainNode.gain.setValueAtTime(0, audioCtx.currentTime);
+        try { if (oscillator) oscillator.stop(); } catch(e) {}
+    }
+}
+
+// ===== ПОСЛІДОВНІСТЬ ВСТУПУ (СВІТЛОШУМОВА ГРАНАТА) =====
 document.getElementById('start-btn').addEventListener('click', () => {
-    // Ховаємо кнопку
+    // 1. Ховаємо кнопку
     document.getElementById('start-screen').style.display = 'none';
     
     const flashOverlay = document.getElementById('flash-overlay');
     flashOverlay.style.display = 'block';
 
-    // Запускаємо швидке мигання
+    // 2. Вмикаємо писк контузії
+    startFlashbangSound();
+
+    // 3. Запускаємо шалене мигання
     let isWhite = false;
     const flashInterval = setInterval(() => {
         isWhite = !isWhite;
         flashOverlay.style.backgroundColor = isWhite ? 'white' : 'black';
-    }, 40); // Швидкість мигання (40мс - дуже різко)
+    }, 40); 
 
-    // Через 2 секунди після старту мигання вмикаємо шум
-    setTimeout(() => {
-        startWhiteNoise();
-    }, 2000);
-
-    // Через 4 секунди після старту зупиняємо мигання і запускаємо анімацію стіни
+    // 4. Через 4 секунди: зупиняємо мигання, залишаємо чорний екран, починаємо гасити звук
     setTimeout(() => {
         clearInterval(flashInterval);
-        flashOverlay.style.display = 'none'; // Ховаємо шар мигання
+        flashOverlay.style.backgroundColor = 'black'; // Чисто чорний екран
         
-        // Запускаємо основну анімацію
-        startTime = Date.now();
-        animId = requestAnimationFrame(animate);
-    }, 4000);
+        fadeOutFlashbangSound(); // Звук починає згасати
+        
+        // 5. Ще через 2.5 секунди (коли звук згас): прибираємо чорний шар і запускаємо анімацію
+        setTimeout(() => {
+            flashOverlay.style.display = 'none'; 
+            
+            startTime = Date.now();
+            animId = requestAnimationFrame(animate);
+        }, 2500);
+        
+    }, 4000); // 4000 мс = 4 секунди мигання
 });
 
 // ===== BACKGROUND =====
@@ -383,17 +388,19 @@ function endIntro(e) {
     if(e.target.id === 'start-btn') return;
     
     // Не даємо перейти далі, поки не пролетить стіна
+    // Тепер ми перевіряємо, чи взагалі запустилась анімація стіни (stage > 1)
     if (!introActive || stage < 2) return; 
     
     introActive = false;
 
-    // Зупиняємо анімацію та шум
+    // Зупиняємо анімацію та звук (якщо він раптом ще грає)
     cancelAnimationFrame(animId);
-    stopWhiteNoise();
+    stopAudioImmediately();
 
     bgCanvas.style.display = "none";
     canvas.style.display = "none";
     document.getElementById("click-hint").style.display = "none";
+    document.getElementById("flash-overlay").style.display = "none";
     
     const mainDiv = document.getElementById("main");
     mainDiv.style.display = "block";
