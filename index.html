@@ -7,7 +7,7 @@
 <style>
 body {
     margin: 0;
-    background: black; /* Фон завжди чорний */
+    background: black;
     overflow: hidden;
     font-family: Arial;
     color: white;
@@ -20,7 +20,7 @@ canvas {
 #main {
     display: none;
     padding: 40px;
-    background: black; /* Чорний фон для основного сайту */
+    background: black; 
     text-align: center;
     min-height: 100vh; 
     box-sizing: border-box;
@@ -94,16 +94,35 @@ function resizeAll(){
 }
 window.addEventListener("resize", resizeAll);
 
-function initDrops(count, minSpeed, maxSpeed, onlyHB = false){
+// Функція для створення монолітної стіни (в один ряд)
+function initWall() {
+    drops = [];
+    const text = "Happy Birthday";
+    const fontSize = 32; // Великий шрифт для стіни
+    const textWidth = 260; // Орієнтовна ширина одного напису
+    const cols = Math.ceil(W / textWidth) + 1; // Рахуємо скільки слів влізе в ширину екрану
+
+    for(let i = 0; i < cols; i++) {
+        drops.push({
+            x: i * textWidth,
+            y: -100, // Всі починають з однакової висоти над екраном
+            speed: 15, // Дуже висока швидкість для "падіння стіни"
+            text: text,
+            size: fontSize
+        });
+    }
+}
+
+// Функція для випадкових повільних слів
+function initDrops(count, minSpeed, maxSpeed){
     drops = [];
     for(let i = 0; i < count; i++){
-        let textOpt = onlyHB ? "Happy Birthday" : words[Math.floor(Math.random() * words.length)];
         drops.push({
             x: Math.random() * W,
-            y: Math.random() * -H * 1.5,
-            speed: minSpeed + Math.random() * maxSpeed,
-            text: textOpt,
-            size: 12 + Math.random() * 10
+            y: Math.random() * -H * 1.5, // Розкидані по висоті
+            speed: minSpeed + Math.random() * maxSpeed, // Різна швидкість
+            text: words[Math.floor(Math.random() * words.length)],
+            size: 14 + Math.random() * 10
         });
     }
 }
@@ -150,7 +169,7 @@ function drawHeart(){
 
         ctx.fillStyle = "#ff7ac6";
         ctx.font = "bold 18px Arial";
-        ctx.shadowBlur = 0; // Прибрали світіння і тут, щоб стиль був єдиним
+        ctx.shadowBlur = 0;
         ctx.fillText(chars[i], 0, 0);
         ctx.restore();
     }
@@ -165,42 +184,39 @@ function drawHeart(){
 // ===== ЛОГІКА АНІМАЦІЇ (ФАЗИ) =====
 let stage = 0;
 let startTime = Date.now();
-const trailCount = 5; // Кількість "привидів" позаду слова
+const trailCount = 6; // Кількість копій для шлейфу
 
 resizeAll();
 
 function animate(){
     let elapsed = Date.now() - startTime;
 
+    // Таймінг подій:
     if(stage === 0) {
-        initDrops(70, 2, 4.5, true); 
+        initWall(); // Створюємо стіну
         stage = 1;
-    } else if (stage === 1 && elapsed > 4500) {
+    } else if (stage === 1 && elapsed > 2500) {
+        // 2.5 секунди стіна пролітає і зникає, робимо паузу
+        drops = []; // Очищаємо масив, щоб екран був пустий
         stage = 2;
-    } else if (stage === 2 && elapsed > 6500) {
-        initDrops(50, 0.5, 2, false);
+    } else if (stage === 2 && elapsed > 3500) {
+        // На 3.5 секунді запускаємо серце і повільні слова
+        initDrops(50, 1, 2.5);
         stage = 3;
     }
 
-    // Тепер фон просто жорстко чорний, ніякого "брудного" шлейфу
+    // Чистий чорний фон
     bgCtx.fillStyle = "black";
     bgCtx.fillRect(0,0,W,H);
 
     drops.forEach(d => {
         bgCtx.font = "bold " + d.size + "px Arial";
-        bgCtx.shadowBlur = 0; 
         
-        // Малюємо шлейф (від прозорого до яскравого)
         for(let j = trailCount; j >= 0; j--) {
-            // Розраховуємо прозорість: чим далі від оригіналу (j більший), тим прозоріше
             let alpha = 1 - (j / trailCount); 
             if(alpha <= 0) continue;
 
-            // 255, 110, 199 - це RGB код рожевого кольору #ff6ec7
             bgCtx.fillStyle = `rgba(255, 110, 199, ${alpha})`;
-            
-            // Розраховуємо позицію копії: вона летить вище за оригінал
-            // Відстань між копіями залежить від розміру шрифту (d.size * 1.5)
             let ghostY = d.y - (j * d.size * 1.5); 
             
             bgCtx.fillText(d.text, d.x, ghostY);
@@ -208,19 +224,19 @@ function animate(){
 
         d.y += d.speed;
 
-        // Перевіряємо, чи зникло найвище слово шлейфу за екран
         let topGhostY = d.y - (trailCount * d.size * 1.5);
 
+        // Якщо слово і його шлейф повністю зникли внизу
         if(topGhostY > H){
-            if(stage === 2) {
-                // Ховаємо слова під час переходу
-            } else {
-                d.y = -50; // Піднімаємо слово ще вище, щоб шлейф не з'являвся різко
+            if(stage >= 3) {
+                // Тільки на 3 стадії слова повертаються нагору (нескінченний дощ)
+                d.y = -50 - (Math.random() * 200);
                 d.x = Math.random() * W;
             }
         }
     });
 
+    // Серце малюємо тільки коли падає "дощ" зі слів (стадія 3)
     if (stage === 3) {
         drawHeart();
     }
