@@ -6,140 +6,33 @@
 <title>Happy Birthday</title>
 
 <style>
-body {
-    margin: 0;
-    background: black;
-    overflow: hidden;
-    font-family: Arial, sans-serif;
-    color: white;
-    touch-action: none;
-}
-
-#start-screen {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: black;
-    z-index: 100;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-#start-btn {
-    padding: 20px 40px;
-    font-size: 24px;
-    border-radius: 15px;
-    border: none;
-    background: #ff7ac6;
-    color: white;
-    cursor: pointer;
-    font-weight: bold;
-    transition: transform 0.2s, background 0.2s;
-    box-shadow: 0 0 20px rgba(255, 122, 198, 0.5);
-}
-#start-btn:hover {
-    transform: scale(1.05);
-    background: #ff4db8;
-}
-
-#flash-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: black;
-    z-index: 50; 
-    display: none;
-}
-
-canvas {
-    position: absolute;
-    top: 0;
-    left: 0;
-    z-index: 1;
-}
-
-#click-hint {
-    position: absolute;
-    bottom: 40px;
-    width: 100%;
-    text-align: center;
-    color: #ffffff;
-    font-size: 18px;
-    z-index: 10;
-    opacity: 0;
-    transition: opacity 1s;
-    pointer-events: none;
-    animation: pulse 1.5s infinite;
-}
-@keyframes pulse {
-    0% { transform: scale(1); opacity: 0.5; }
-    50% { transform: scale(1.05); opacity: 1; }
-    100% { transform: scale(1); opacity: 0.5; }
-}
-
-#main {
-    display: none;
-    padding: 40px 20px;
-    background: black; 
-    text-align: center;
-    min-height: 100vh; 
-    box-sizing: border-box;
-    position: relative;
-    z-index: 20;
-}
+body { margin: 0; background: black; overflow: hidden; font-family: Arial, sans-serif; color: white; touch-action: none; }
+#start-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: black; z-index: 100; display: flex; align-items: center; justify-content: center; }
+#start-btn { padding: 20px 40px; font-size: 24px; border-radius: 15px; border: none; background: #ff7ac6; color: white; cursor: pointer; font-weight: bold; transition: transform 0.2s, background 0.2s; box-shadow: 0 0 20px rgba(255, 122, 198, 0.5); }
+#start-btn:hover { transform: scale(1.05); background: #ff4db8; }
+#flash-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: black; z-index: 50; display: none; }
+canvas { position: absolute; top: 0; left: 0; z-index: 1; }
+#click-hint { position: absolute; bottom: 40px; width: 100%; text-align: center; color: #ffffff; font-size: 18px; z-index: 10; opacity: 0; transition: opacity 1s; pointer-events: none; animation: pulse 1.5s infinite; }
+@keyframes pulse { 0% { transform: scale(1); opacity: 0.5; } 50% { transform: scale(1.05); opacity: 1; } 100% { transform: scale(1); opacity: 0.5; } }
+#main { display: none; padding: 40px 20px; background: black; text-align: center; min-height: 100vh; box-sizing: border-box; position: relative; z-index: 20; }
 #main h1 { color: #ff7ac6; }
 #main p { color: #dddddd; }
-.gallery {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 15px;
-}
-.gallery img {
-    width: 100%;
-    max-width: 300px;
-    border-radius: 15px;
-}
-.main-btn {
-    margin-top: 40px;
-    padding: 15px 30px;
-    font-size: 20px;
-    border-radius: 10px;
-    border: none;
-    background: #ff7ac6;
-    color: white;
-    cursor: pointer;
-    font-weight: bold;
-    transition: transform 0.2s;
-}
+.gallery { display: flex; flex-wrap: wrap; justify-content: center; gap: 15px; }
+.gallery img { width: 100%; max-width: 300px; border-radius: 15px; }
+.main-btn { margin-top: 40px; padding: 15px 30px; font-size: 20px; border-radius: 10px; border: none; background: #ff7ac6; color: white; cursor: pointer; font-weight: bold; transition: transform 0.2s; }
 .main-btn:hover { transform: scale(1.05); }
 
-/* Ховаємо контейнер для YouTube плеєра */
-#youtube-player-container {
-    position: absolute;
-    width: 0;
-    height: 0;
-    overflow: hidden;
-    z-index: -1;
-}
+/* YouTube плеєр ховаємо */
+#youtube-player-container { position: absolute; width: 1px; height: 1px; overflow: hidden; z-index: -1; opacity: 0; }
 </style>
 </head>
 
 <body>
 
-<div id="youtube-player-container">
-    <div id="youtube-player"></div>
-</div>
+<div id="youtube-player-container"><div id="youtube-player"></div></div>
 
-<div id="start-screen">
-    <button id="start-btn">Відкрити подарунок 🎁</button>
-</div>
+<div id="start-screen"><button id="start-btn">Відкрити подарунок 🎁</button></div>
 <div id="flash-overlay"></div>
-
 <div id="click-hint">Натисни на екран 🎁</div>
 <canvas id="bg"></canvas>
 <canvas id="c"></canvas>
@@ -151,9 +44,7 @@ canvas {
         <img src="photo1.jpg" alt="Фото 1">
         <img src="photo2.jpg" alt="Фото 2">
     </div>
-    <a href="https://gameinvitation.com/" target="_blank">
-        <button class="main-btn">🎮 Пограти</button>
-    </a>
+    <a href="https://gameinvitation.com/" target="_blank"><button class="main-btn">🎮 Пограти</button></a>
 </div>
 
 <script>
@@ -161,35 +52,24 @@ canvas {
 let ytPlayer;
 let isPlayerReady = false;
 
-// Завантажуємо скрипт YouTube API
 const tag = document.createElement('script');
 tag.src = "https://www.youtube.com/iframe_api";
 const firstScriptTag = document.getElementsByTagName('script')[0];
 firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
 
-// Ця функція автоматично викличеться, коли API завантажиться
 function onYouTubeIframeAPIReady() {
     ytPlayer = new YT.Player('youtube-player', {
-        height: '10',
-        width: '10',
-        videoId: 'fzGQh8M2pZk', // ID відео "Die With A Smile"
+        height: '100',
+        width: '100',
+        videoId: 'hK-eE5D2L0g', // Lyric-відео (менше шансів на блокування)
         playerVars: {
-            'autoplay': 0,
-            'controls': 0,
-            'disablekb': 1,
-            'playsinline': 1 // Важливо для телефонів
+            'autoplay': 0, 'controls': 0, 'disablekb': 1, 'playsinline': 1
         },
-        events: {
-            'onReady': onPlayerReady
-        }
+        events: { 'onReady': () => isPlayerReady = true }
     });
 }
 
-function onPlayerReady(event) {
-    isPlayerReady = true;
-}
-
-// ===== WEB AUDIO API: ПИСК ГРАНАТИ =====
+// ===== WEB AUDIO API: ПИСК =====
 let audioCtx, oscillator, gainNode;
 
 function startFlashbangSound() {
@@ -205,12 +85,9 @@ function startFlashbangSound() {
 }
 
 function fadeOutSounds() {
-    // Плавне затухання писку
     if (gainNode && audioCtx) {
         gainNode.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 2);
     }
-    
-    // Плавне затухання YouTube музики
     if (isPlayerReady && ytPlayer && typeof ytPlayer.getVolume === 'function') {
         let vol = ytPlayer.getVolume();
         let fadeOut = setInterval(() => {
@@ -225,15 +102,17 @@ function fadeOutSounds() {
     }
 }
 
-// ===== ВСТУП (КЛІК ПО КНОПЦІ) =====
+// ===== ВСТУП =====
 document.getElementById('start-btn').addEventListener('click', () => {
     document.getElementById('start-screen').style.display = 'none';
     const flashOverlay = document.getElementById('flash-overlay');
     flashOverlay.style.display = 'block';
 
-    // Розблоковуємо YouTube аудіо на мобільних пристроях
+    // РІШЕННЯ ДЛЯ YOUTUBE: Запускаємо відразу при кліку, але без звуку!
     if (isPlayerReady) {
-        ytPlayer.mute();
+        ytPlayer.unMute();
+        ytPlayer.setVolume(0); // Гучність 0, щоб не заважати писку
+        ytPlayer.seekTo(45); // Перемотуємо на 45 секунду
         ytPlayer.playVideo();
     }
 
@@ -245,23 +124,21 @@ document.getElementById('start-btn').addEventListener('click', () => {
         flashOverlay.style.backgroundColor = isWhite ? 'white' : 'black';
     }, 40); 
 
+    // Через 4 секунди: зупинка мигання і затухання писку
     setTimeout(() => {
         clearInterval(flashInterval);
         flashOverlay.style.backgroundColor = 'black'; 
         
-        // Починаємо гасити писк
         if (gainNode && audioCtx) {
             gainNode.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 2.5);
         }
 
+        // Через ще 2.5 секунди (разом 6.5с): починається анімація і вмикається гучність пісні
         setTimeout(() => {
             flashOverlay.style.display = 'none'; 
             
-            // Вмикаємо пісню з 48-ї секунди (початок приспіву)
             if (isPlayerReady) {
-                ytPlayer.seekTo(45);
-                ytPlayer.unMute();
-                ytPlayer.setVolume(70); // Гучність 70%
+                ytPlayer.setVolume(70); // Різко вмикаємо гучність
             }
 
             startTime = Date.now();
@@ -281,10 +158,8 @@ const words = ["I love you", "Happy Birthday", "Egorka", "Die With A Smile"];
 function resizeAll(){
     W = window.innerWidth;
     H = window.innerHeight;
-    bgCanvas.width = W;
-    bgCanvas.height = H;
-    canvas.width = W;
-    canvas.height = H;
+    bgCanvas.width = W; bgCanvas.height = H;
+    canvas.width = W; canvas.height = H;
 }
 window.addEventListener("resize", resizeAll);
 
@@ -307,13 +182,7 @@ function initWall() {
 function initDrops(count, minSpeed, maxSpeed){
     drops = [];
     for(let i = 0; i < count; i++){
-        drops.push({
-            x: Math.random() * W,
-            y: Math.random() * -H * 1.5,
-            speed: minSpeed + Math.random() * maxSpeed,
-            text: words[Math.floor(Math.random() * words.length)],
-            size: 14 + Math.random() * 12
-        });
+        drops.push({ x: Math.random() * W, y: Math.random() * -H * 1.5, speed: minSpeed + Math.random() * maxSpeed, text: words[Math.floor(Math.random() * words.length)], size: 14 + Math.random() * 12 });
     }
 }
 
@@ -358,11 +227,7 @@ function drawHeart(){
     ctx.fillText("Happy Birthday 🎂", W/2, H/2 - 30);
 }
 
-let stage = 0;
-let startTime;
-const trailCount = 5;
-let animId;
-
+let stage = 0; let startTime; const trailCount = 5; let animId;
 resizeAll();
 
 function animate(){
