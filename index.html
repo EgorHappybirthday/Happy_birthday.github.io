@@ -76,7 +76,7 @@ document.getElementById('start-btn').addEventListener('click', () => {
 
     // 1. Запускаємо музику миттєво, але БЕЗ ЗВУКУ, і мотаємо на 45 сек
     bgMusic.volume = 0;
-    bgMusic.currentTime = 45;
+    bgMusic.currentTime = 35;
     bgMusic.play().catch(e => console.log("Браузер заблокував звук:", e));
 
     // 2. Вмикаємо писк гранати
