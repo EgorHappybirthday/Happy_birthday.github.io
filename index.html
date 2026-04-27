@@ -59,7 +59,7 @@ button {
 </div>
 
 <script>
-// ===== BACKGROUND (падаючі слова) =====
+// ===== BACKGROUND =====
 const bgCanvas = document.getElementById("bg");
 const bgCtx = bgCanvas.getContext("2d");
 
@@ -96,7 +96,8 @@ function initDrops(){
 }
 
 function drawBG(){
-    bgCtx.fillStyle = "black";
+    // ШЛЕЙФ
+    bgCtx.fillStyle = "rgba(0,0,0,0.15)";
     bgCtx.fillRect(0,0,W,H);
 
     drops.forEach(d=>{
@@ -137,7 +138,7 @@ function drawHeart(){
     ctx.clearRect(0,0,W,H);
 
     let scale = 12 + Math.sin(time*2)*2;
-    let rot = time * 0.35;
+    let rot = time * 0.25; // повільніше
 
     for(let i=0;i<chars.length;i++){
 
@@ -171,6 +172,7 @@ function drawHeart(){
         ctx.restore();
     }
 
+    // центральний текст
     ctx.fillStyle = "white";
     ctx.font = "bold 42px Arial";
     ctx.textAlign = "center";
@@ -201,4 +203,3 @@ setTimeout(()=>{
 
 </body>
 </html>
-
