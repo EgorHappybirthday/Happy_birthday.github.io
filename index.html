@@ -292,14 +292,14 @@
 
                 // ВМИКАЄМО ПІСНЮ за 4 секунди до появи стіни
                 setTimeout(() => {
-                    bgMusic.currentTime = 38;
+                    bgMusic.currentTime = 40;
                     bgMusic.play().catch(e => console.log("Audio block:", e));
                     let vol = 0;
                     let fadeIn = setInterval(() => {
                         if (vol < 0.6) { vol += 0.05; bgMusic.volume = Math.min(vol, 0.6); } 
                         else { clearInterval(fadeIn); }
                     }, 100);
-                }, 20000);
+                }, 22000);
 
                 // Через 20 секунд: титри закінчилися, запускаємо стіну
                 setTimeout(() => {
