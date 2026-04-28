@@ -14,12 +14,20 @@
         #start-btn:hover { transform: scale(1.05); background: #ff4db8; }
         #flash-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: black; z-index: 50; display: none; }
 
-        /* ТИТРИ */
-        #credits-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100dvh; background: black; z-index: 40; display: none; overflow: hidden; }
-        .credits-text { position: absolute; width: 100%; text-align: center; color: white; font-size: 28px; font-weight: 800; line-height: 1.6; transform: translateY(100vh); opacity: 0; padding: 0 20px; box-sizing: border-box; }
-        .credits-text p { margin: 12px 0; color: #eee; text-shadow: 0 0 10px rgba(255,255,255,0.3); }
-        .credits-text b { color: #fff; font-size: 38px; text-shadow: 0 0 15px rgba(255, 122, 198, 0.8); }
-        .credits-text h2 { margin-top: 50px; color: #ff7ac6; font-size: 48px; letter-spacing: 3px; text-shadow: 0 0 20px #ff7ac6; font-weight: 900; text-transform: uppercase; }
+        /* ТИТРИ (ВЕЛИЧЕЗНІ І ЖИРНІ) */
+        #credits-overlay {
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100dvh;
+            background: black; z-index: 40; display: none; overflow: hidden;
+        }
+        .credits-text {
+            position: absolute; width: 100%; text-align: center; color: white;
+            font-size: 32px; font-weight: 900; line-height: 1.6; font-family: 'Segoe UI', Arial, sans-serif;
+            transform: translateY(100vh); opacity: 0; padding: 0 20px; box-sizing: border-box;
+        }
+        .credits-text p { margin: 15px 0; color: #eee; text-shadow: 0 0 15px rgba(255,255,255,0.4); }
+        .credits-text b { color: #fff; font-size: 46px; text-shadow: 0 0 20px rgba(255, 122, 198, 0.9); }
+        .credits-text h2 { margin-top: 60px; color: #ff7ac6; font-size: 56px; letter-spacing: 4px; text-shadow: 0 0 25px #ff7ac6; font-weight: 900; text-transform: uppercase; }
+        
         .credits-text.run { animation: scrollCredits 14s linear forwards; }
         @keyframes scrollCredits { 0% { transform: translateY(100vh); opacity: 0; } 10% { opacity: 1; } 85% { opacity: 1; } 100% { transform: translateY(-100vh); opacity: 0; } }
 
@@ -28,70 +36,72 @@
         #click-hint { position: absolute; bottom: 40px; width: 100%; text-align: center; color: #ffffff; font-size: 18px; z-index: 10; opacity: 0; transition: opacity 1s; pointer-events: none; animation: pulse 1.5s infinite; }
         @keyframes pulse { 0%, 100% { opacity: 0.4; } 50% { opacity: 1; } }
 
-        /* ОСНОВНИЙ САЙТ (ГАЛЕРЕЯ PINTEREST) */
-        #main { display: none; padding: 60px 20px; background: #050505; text-align: center; min-height: 100vh; box-sizing: border-box; position: relative; z-index: 20; overflow-y: auto; }
+        /* ОСНОВНИЙ САЙТ */
+        #main {
+            display: none; padding: 60px 20px; background: #050505; text-align: center;
+            min-height: 100vh; box-sizing: border-box; position: relative; z-index: 20; overflow-y: auto;
+        }
         #main h1 { color: #ff7ac6; font-size: 32px; margin-bottom: 10px; }
-        #main p { color: #aaa; margin-bottom: 40px; }
+        #main p { color: #aaa; margin-bottom: 40px; font-size: 18px; }
 
-        .masonry-gallery {
-            column-count: 3; /* 3 колонки на ПК */
-            column-gap: 15px;
-            max-width: 1200px;
-            margin: 0 auto;
+        /* INSTAGRAM FEED (СТРІЧКА ФОТО) */
+        .ig-feed {
+            display: flex; flex-direction: column; gap: 50px;
+            max-width: 550px; margin: 0 auto;
         }
-
         .media-card {
-            break-inside: avoid; /* Запобігає розриву фото між колонками */
-            margin-bottom: 15px;
-            border-radius: 15px;
-            overflow: hidden;
-            background: #111;
-            border: 1px solid rgba(255, 255, 255, 0.05);
-            transition: transform 0.3s, border-color 0.3s;
-            cursor: pointer;
-            position: relative;
+            background: #0d0d0d; border-radius: 20px; padding: 12px 12px 0 12px;
+            border: 1px solid rgba(255, 122, 198, 0.15); box-shadow: 0 15px 35px rgba(0,0,0,0.6);
+            position: relative; cursor: pointer; transition: transform 0.3s, box-shadow 0.3s, border-color 0.3s;
         }
-        .media-card:hover { transform: translateY(-5px); border-color: #ff7ac6; }
-        .media-card img, .media-card video { width: 100%; display: block; border-radius: 15px; }
+        .media-card:hover { transform: translateY(-5px); border-color: #ff7ac6; box-shadow: 0 15px 40px rgba(255, 122, 198, 0.25); }
+        .media-card img, .media-card video { width: 100%; height: auto; border-radius: 12px; display: block; }
         
-        /* Іконка Play для відео в галереї */
         .video-card::after {
-            content: "▶"; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
-            font-size: 50px; color: rgba(255,255,255,0.9); text-shadow: 0 0 15px #000; pointer-events: none;
+            content: "▶"; position: absolute; top: 45%; left: 50%; transform: translate(-50%, -50%);
+            font-size: 60px; color: rgba(255,255,255,0.9); text-shadow: 0 0 20px #000; pointer-events: none;
         }
+        .card-footer { padding: 15px 5px; display: flex; justify-content: space-between; align-items: center; }
+        .card-footer-icons { font-size: 22px; color: #ff7ac6; letter-spacing: 15px; }
+        .card-footer-text { color: #888; font-size: 14px; font-style: italic; }
 
+        /* КНОПКА ГРИ */
         .game-card {
+            width: 100%; max-width: 550px; margin: 40px auto;
+            background: linear-gradient(45deg, #ff7ac6, #ff4db8);
             display: flex; flex-direction: column; align-items: center; justify-content: center;
-            background: linear-gradient(45deg, #ff7ac6, #ff4db8); color: white; border: none;
-            padding: 40px 20px; border-radius: 20px; font-weight: bold; font-size: 24px;
-            cursor: pointer; transition: transform 0.2s; max-width: 800px; margin: 40px auto;
+            color: white; border: none; height: 130px; cursor: pointer;
+            border-radius: 20px; font-weight: bold; font-size: 24px; transition: transform 0.2s;
             box-shadow: 0 10px 30px rgba(255, 122, 198, 0.3);
         }
-        .game-card:hover { transform: scale(1.03); }
+        .game-card:hover { transform: scale(1.02); }
 
-        /* ЛАЙТБОКС (ВІДКРИТТЯ ФОТО/ВІДЕО) */
+        /* ЛАЙТБОКС (ФОТО/ВІДЕО НА ВЕСЬ ЕКРАН) */
         #lightbox {
             display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100dvh;
             background: rgba(0,0,0,0.95); z-index: 10000; justify-content: center; align-items: center;
             backdrop-filter: blur(10px); flex-direction: column;
         }
         #lightbox.active { display: flex; }
-        #lightbox-content { max-width: 90%; max-height: 85%; }
-        #lightbox-content img, #lightbox-content video { width: auto; height: auto; max-width: 100%; max-height: 85vh; border-radius: 10px; box-shadow: 0 0 30px rgba(0,0,0,0.8); }
+        #lightbox-content { max-width: 95%; max-height: 85%; }
+        #lightbox-content img, #lightbox-content video { width: auto; height: auto; max-width: 100%; max-height: 85vh; border-radius: 10px; box-shadow: 0 0 30px rgba(0,0,0,0.8); outline: none; }
         #lightbox-close { position: absolute; top: 20px; right: 20px; background: #ff7ac6; border: none; color: white; padding: 10px 20px; border-radius: 10px; cursor: pointer; font-weight: bold; z-index: 10001; }
 
         /* ОВЕРЛЕЙ ДЛЯ ГРИ */
-        #game-overlay { visibility: hidden; opacity: 0; pointer-events: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100dvh; background: #000; z-index: 9999; transition: opacity 0.3s ease; }
+        #game-overlay {
+            visibility: hidden; opacity: 0; pointer-events: none;
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100dvh;
+            background: #000; z-index: 9999; transition: opacity 0.3s ease;
+        }
         #game-overlay.active { visibility: visible; opacity: 1; pointer-events: auto; }
-        #close-game-btn { position: absolute; top: 15px; right: 15px; z-index: 10000; padding: 10px 20px; font-size: 16px; border-radius: 10px; border: none; background: #ff7ac6; color: white; cursor: pointer; font-weight: bold; }
+        #close-game-btn { position: absolute; top: 15px; right: 15px; z-index: 10000; padding: 10px 20px; font-size: 16px; border-radius: 10px; border: none; background: #ff7ac6; color: white; cursor: pointer; font-weight: bold; box-shadow: 0 4px 10px rgba(0,0,0,0.5); }
         .game-container { position: absolute; top: 60px; left: 0; right: 0; bottom: 0; overflow-y: auto; -webkit-overflow-scrolling: touch; }
         .remix-app { width: 100% !important; height: 100% !important; min-height: 85vh !important; }
 
-        /* АДАПТАЦІЯ ПІД ТЕЛЕФОН */
-        @media (max-width: 800px) { .masonry-gallery { column-count: 2; } }
-        @media (max-width: 500px) { 
-            .masonry-gallery { column-count: 2; } /* Навіть на телефоні залишаємо 2 акуратні колонки */
-            .credits-text { font-size: 22px; padding: 0 10px; } .credits-text b { font-size: 30px; } .credits-text h2 { font-size: 34px; letter-spacing: 1px; }
+        @media (max-width: 600px) {
+            .credits-text { font-size: 24px; padding: 0 10px; }
+            .credits-text b { font-size: 34px; }
+            .credits-text h2 { font-size: 42px; letter-spacing: 2px; }
         }
     </style>
 </head>
@@ -126,32 +136,76 @@
     <h1>З Днем Народження, Єгоре! 🎉</h1>
     <p>Натискай на фото або відео, щоб відкрити на весь екран</p>
 
-    <div class="masonry-gallery">
-        <div class="media-card" data-type="image" data-src="photo_1.jpg"><img src="photo_1.jpg"></div>
-        <div class="media-card" data-type="image" data-src="photo_1-1.jpg"><img src="photo_1-1.jpg"></div>
-        <div class="media-card video-card" data-type="video" data-src="video_6.mp4"><video src="video_6.mp4" muted loop></video></div>
-        <div class="media-card" data-type="image" data-src="photo_1-2.jpg"><img src="photo_1-2.jpg"></div>
-        <div class="media-card" data-type="image" data-src="photo_1-12.jpg"><img src="photo_1-12.jpg"></div>
-        <div class="media-card video-card" data-type="video" data-src="video_1.mp4"><video src="video_1.mp4" muted loop></video></div>
-        
-        <div class="media-card" data-type="image" data-src="photo_1-3.jpg"><img src="photo_1-3.jpg"></div>
-        <div class="media-card" data-type="image" data-src="photo_1-4.jpg"><img src="photo_1-4.jpg"></div>
-        <div class="media-card video-card" data-type="video" data-src="video_7.mp4"><video src="video_7.mp4" muted loop></video></div>
-        <div class="media-card" data-type="image" data-src="photo_1-10.jpg"><img src="photo_1-10.jpg"></div>
-        <div class="media-card video-card" data-type="video" data-src="video_2.mp4"><video src="video_2.mp4" muted loop></video></div>
-        <div class="media-card" data-type="image" data-src="photo_1-11.jpg"><img src="photo_1-11.jpg"></div>
-        <div class="media-card video-card" data-type="video" data-src="video_8.mp4"><video src="video_8.mp4" muted loop></video></div>
-        <div class="media-card" data-type="image" data-src="photo_1-5.jpg"><img src="photo_1-5.jpg"></div>
-        <div class="media-card video-card" data-type="video" data-src="video_3.mp4"><video src="video_3.mp4" muted loop></video></div>
-        
-        <div class="media-card" data-type="image" data-src="photo_1-6.jpg"><img src="photo_1-6.jpg"></div>
-        <div class="media-card" data-type="image" data-src="photo_1-14.jpg"><img src="photo_1-14.jpg"></div>
-        <div class="media-card video-card" data-type="video" data-src="video_4.mp4"><video src="video_4.mp4" muted loop></video></div>
-        <div class="media-card" data-type="image" data-src="photo_1-7.jpg"><img src="photo_1-7.jpg"></div>
-        <div class="media-card video-card" data-type="video" data-src="video_5.mp4"><video src="video_5.mp4" muted loop></video></div>
-        <div class="media-card" data-type="image" data-src="photo_1-.8jpg"><img src="photo_1-8.jpg"></div>
-        <div class="media-card" data-type="image" data-src="photo_1-9.jpg"><img src="photo_1-9.jpg"></div>
-        <div class="media-card" data-type="image" data-src="photo_1-13.jpg"><img src="photo_1-13.jpg"></div>
+    <div class="ig-feed">
+        <div class="media-card" data-type="image" data-src="photo_1.jpg">
+            <img src="photo_1.jpg"><div class="card-footer"><div class="card-footer-icons">❤️ 💬 🚀</div><div class="card-footer-text">Збережено в пам'яті</div></div>
+        </div>
+        <div class="media-card" data-type="image" data-src="photo_1-1.jpg">
+            <img src="photo_1-1.jpg"><div class="card-footer"><div class="card-footer-icons">❤️ 💬 🚀</div><div class="card-footer-text">Збережено в пам'яті</div></div>
+        </div>
+        <div class="media-card video-card" data-type="video" data-src="video_6.mp4">
+            <video src="video_6.mp4" muted loop playsinline></video><div class="card-footer"><div class="card-footer-icons">❤️ 💬 🚀</div><div class="card-footer-text">Збережено в пам'яті</div></div>
+        </div>
+        <div class="media-card" data-type="image" data-src="photo_1-2.jpg">
+            <img src="photo_1-2.jpg"><div class="card-footer"><div class="card-footer-icons">❤️ 💬 🚀</div><div class="card-footer-text">Збережено в пам'яті</div></div>
+        </div>
+        <div class="media-card" data-type="image" data-src="photo_1-12.jpg">
+            <img src="photo_1-12.jpg"><div class="card-footer"><div class="card-footer-icons">❤️ 💬 🚀</div><div class="card-footer-text">Збережено в пам'яті</div></div>
+        </div>
+        <div class="media-card video-card" data-type="video" data-src="video_1.mp4">
+            <video src="video_1.mp4" muted loop playsinline></video><div class="card-footer"><div class="card-footer-icons">❤️ 💬 🚀</div><div class="card-footer-text">Збережено в пам'яті</div></div>
+        </div>
+        <div class="media-card" data-type="image" data-src="photo_1-3.jpg">
+            <img src="photo_1-3.jpg"><div class="card-footer"><div class="card-footer-icons">❤️ 💬 🚀</div><div class="card-footer-text">Збережено в пам'яті</div></div>
+        </div>
+        <div class="media-card" data-type="image" data-src="photo_1-4.jpg">
+            <img src="photo_1-4.jpg"><div class="card-footer"><div class="card-footer-icons">❤️ 💬 🚀</div><div class="card-footer-text">Збережено в пам'яті</div></div>
+        </div>
+        <div class="media-card video-card" data-type="video" data-src="video_7.mp4">
+            <video src="video_7.mp4" muted loop playsinline></video><div class="card-footer"><div class="card-footer-icons">❤️ 💬 🚀</div><div class="card-footer-text">Збережено в пам'яті</div></div>
+        </div>
+        <div class="media-card" data-type="image" data-src="photo_1-10.jpg">
+            <img src="photo_1-10.jpg"><div class="card-footer"><div class="card-footer-icons">❤️ 💬 🚀</div><div class="card-footer-text">Збережено в пам'яті</div></div>
+        </div>
+        <div class="media-card video-card" data-type="video" data-src="video_2.mp4">
+            <video src="video_2.mp4" muted loop playsinline></video><div class="card-footer"><div class="card-footer-icons">❤️ 💬 🚀</div><div class="card-footer-text">Збережено в пам'яті</div></div>
+        </div>
+        <div class="media-card" data-type="image" data-src="photo_1-11.jpg">
+            <img src="photo_1-11.jpg"><div class="card-footer"><div class="card-footer-icons">❤️ 💬 🚀</div><div class="card-footer-text">Збережено в пам'яті</div></div>
+        </div>
+        <div class="media-card video-card" data-type="video" data-src="video_8.mp4">
+            <video src="video_8.mp4" muted loop playsinline></video><div class="card-footer"><div class="card-footer-icons">❤️ 💬 🚀</div><div class="card-footer-text">Збережено в пам'яті</div></div>
+        </div>
+        <div class="media-card" data-type="image" data-src="photo_1-5.jpg">
+            <img src="photo_1-5.jpg"><div class="card-footer"><div class="card-footer-icons">❤️ 💬 🚀</div><div class="card-footer-text">Збережено в пам'яті</div></div>
+        </div>
+        <div class="media-card video-card" data-type="video" data-src="video_3.mp4">
+            <video src="video_3.mp4" muted loop playsinline></video><div class="card-footer"><div class="card-footer-icons">❤️ 💬 🚀</div><div class="card-footer-text">Збережено в пам'яті</div></div>
+        </div>
+        <div class="media-card" data-type="image" data-src="photo_1-6.jpg">
+            <img src="photo_1-6.jpg"><div class="card-footer"><div class="card-footer-icons">❤️ 💬 🚀</div><div class="card-footer-text">Збережено в пам'яті</div></div>
+        </div>
+        <div class="media-card" data-type="image" data-src="photo_1-14.jpg">
+            <img src="photo_1-14.jpg"><div class="card-footer"><div class="card-footer-icons">❤️ 💬 🚀</div><div class="card-footer-text">Збережено в пам'яті</div></div>
+        </div>
+        <div class="media-card video-card" data-type="video" data-src="video_4.mp4">
+            <video src="video_4.mp4" muted loop playsinline></video><div class="card-footer"><div class="card-footer-icons">❤️ 💬 🚀</div><div class="card-footer-text">Збережено в пам'яті</div></div>
+        </div>
+        <div class="media-card" data-type="image" data-src="photo_1-7.jpg">
+            <img src="photo_1-7.jpg"><div class="card-footer"><div class="card-footer-icons">❤️ 💬 🚀</div><div class="card-footer-text">Збережено в пам'яті</div></div>
+        </div>
+        <div class="media-card video-card" data-type="video" data-src="video_5.mp4">
+            <video src="video_5.mp4" muted loop playsinline></video><div class="card-footer"><div class="card-footer-icons">❤️ 💬 🚀</div><div class="card-footer-text">Збережено в пам'яті</div></div>
+        </div>
+        <div class="media-card" data-type="image" data-src="photo_1-8.jpg">
+            <img src="photo_1-8.jpg"><div class="card-footer"><div class="card-footer-icons">❤️ 💬 🚀</div><div class="card-footer-text">Збережено в пам'яті</div></div>
+        </div>
+        <div class="media-card" data-type="image" data-src="photo_1-9.jpg">
+            <img src="photo_1-9.jpg"><div class="card-footer"><div class="card-footer-icons">❤️ 💬 🚀</div><div class="card-footer-text">Збережено в пам'яті</div></div>
+        </div>
+        <div class="media-card" data-type="image" data-src="photo_1-13.jpg">
+            <img src="photo_1-13.jpg"><div class="card-footer"><div class="card-footer-icons">❤️ 💬 🚀</div><div class="card-footer-text">Збережено в пам'яті</div></div>
+        </div>
     </div>
 
     <button id="open-game-btn" class="game-card">
@@ -209,6 +263,7 @@
         const flashOverlay = document.getElementById('flash-overlay');
         flashOverlay.style.display = 'block';
 
+        // Трюк для браузера: запускаємо і відразу пауза (музика ЩЕ НЕ грає)
         bgMusic.volume = 0;
         let playPromise = bgMusic.play();
         if (playPromise !== undefined) { playPromise.then(_ => { bgMusic.pause(); }).catch(e => {}); }
@@ -221,11 +276,13 @@
             flashOverlay.style.backgroundColor = isWhite ? 'white' : 'black';
         }, 40); 
 
+        // Через 4 секунди: зупиняємо мигання
         setTimeout(() => {
             clearInterval(flashInterval);
             flashOverlay.style.backgroundColor = 'black'; 
             fadeOutFlashbang();
 
+            // Через 2.5 секунди: показуємо титри (в тиші)
             setTimeout(() => {
                 flashOverlay.style.display = 'none'; 
                 
@@ -233,6 +290,7 @@
                 creditsOverlay.style.display = 'block';
                 document.querySelector('.credits-text').classList.add('run');
 
+                // Через 16 секунд (титри пройшли): запускаємо стіну
                 setTimeout(() => {
                     creditsOverlay.style.display = 'none';
                     startTime = Date.now();
@@ -301,6 +359,7 @@
         else if (stage === 2 && elapsed > 2500) { 
             initDrops(60, 3, 7); document.getElementById("click-hint").style.opacity = 1; stage = 3; 
 
+            // ОСЬ ТУТ ВМИКАЄТЬСЯ МУЗИКА (КОЛИ ПАДАЄ СТІНА І З'ЯВЛЯЄТЬСЯ СЕРЦЕ)
             bgMusic.currentTime = 35; bgMusic.play();
             let vol = 0;
             let fadeIn = setInterval(() => {
@@ -333,9 +392,10 @@
         introActive = false;
 
         cancelAnimationFrame(animId);
+        // Зменшуємо гучність музики для фону галереї
         let fadeOut = setInterval(() => {
-            if (bgMusic.volume > 0.05) { bgMusic.volume -= 0.05; } 
-            else { bgMusic.pause(); clearInterval(fadeOut); }
+            if (bgMusic.volume > 0.2) { bgMusic.volume -= 0.05; } 
+            else { clearInterval(fadeOut); }
         }, 100);
 
         bgCanvas.style.display = "none"; canvas.style.display = "none";
@@ -349,7 +409,7 @@
     }
     window.addEventListener("click", endIntro); window.addEventListener("touchstart", endIntro);
 
-    // ===== ЛОГІКА ЛАЙТБОКСУ (ГАЛЕРЕЇ) =====
+    // ===== ЛАЙТБОКС =====
     const lightbox = document.getElementById('lightbox');
     const lightboxContent = document.getElementById('lightbox-content');
     const lightboxClose = document.getElementById('lightbox-close');
@@ -381,9 +441,7 @@
 
     function closeLightbox() {
         lightbox.classList.remove('active');
-        lightboxContent.innerHTML = ''; // Зупиняє відео
-        
-        // Повертаємо фонову музику
+        lightboxContent.innerHTML = ''; 
         if (isMusicPausedForVideo) {
             bgMusic.play();
             isMusicPausedForVideo = false;
@@ -395,6 +453,7 @@
     // ===== ЛОГІКА ГРИ =====
     document.getElementById('open-game-btn').addEventListener('click', () => {
         document.getElementById('game-overlay').classList.add('active');
+        bgMusic.pause(); // Зупиняємо основну музику
         gameMusic.currentTime = 0;
         gameMusic.play().catch(e => console.log("Game audio error:", e));
     });
@@ -402,6 +461,7 @@
     document.getElementById('close-game-btn').addEventListener('click', () => {
         document.getElementById('game-overlay').classList.remove('active');
         gameMusic.pause();
+        bgMusic.play(); // Повертаємо основну музику
     });
 
 </script>
